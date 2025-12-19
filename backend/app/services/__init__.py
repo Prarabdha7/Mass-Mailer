@@ -28,3 +28,11 @@ from app.services.smtp_client import (
     get_delivery_report,
     create_campaign_id
 )
+
+from app.services.reputation_manager import (
+    SuppressedEmail,
+    ReputationStatus,
+    ReputationManager,
+    get_reputation_manager,
+    reset_reputation_manager
+)

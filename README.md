@@ -1,2 +1,2 @@
 # Mass-Mailer
-This is working.
+This is working

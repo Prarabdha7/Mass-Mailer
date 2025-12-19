@@ -1,0 +1,13 @@
+server:
+  host: "0.0.0.0"
+  port: 5000
+  debug: true
+
+email:
+  batch_size: 10
+  delay_seconds: 1.0
+  max_retries: 3
+
+rate_limiting:
+  requests_per_minute: 60
+  burst_limit: 10

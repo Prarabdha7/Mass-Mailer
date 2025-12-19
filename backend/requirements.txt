@@ -1,0 +1,7 @@
+Flask==3.0.0
+dnspython==2.4.2
+hypothesis==6.92.1
+pytest==7.4.3
+python-dotenv==1.0.0
+PyYAML==6.0.1
+click==8.1.7

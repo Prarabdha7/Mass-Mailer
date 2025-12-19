@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mass Mailer</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Mass Mailer</h2>
+
+        <form id="mailerForm" enctype="multipart/form-data">
+            <input name="Purpose" placeholder="Email Purpose" required>
+            <input name="subject" placeholder="Email Subject" required>
+
+            <textarea name="Content box" placeholder="Type or paste the content here" required></textarea>
+
+            <input type="file" name="file" accept=".csv" required>
+
+            <button type="submit">Upload CSV</button>
+        </form>
+
+        <button onclick="sendEmails()">Send Emails</button>
+    </div>
+</body>
+</html>

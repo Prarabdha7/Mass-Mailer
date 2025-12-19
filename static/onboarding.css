@@ -1,0 +1,155 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.bg {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.onboard-card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 560px;
+    border-radius: 18px;
+    padding: 32px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    animation: fadeIn 0.6s ease;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.header h1 {
+    font-size: 34px;
+    color: #1f2937;
+}
+
+.header p {
+    margin-top: 6px;
+    color: #6b7280;
+    font-size: 15px;
+}
+
+.steps {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.step:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+.step span {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    color: white;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.step h3 {
+    font-size: 15px;
+    margin-bottom: 2px;
+    color: #111827;
+}
+
+.step p {
+    font-size: 13px;
+    color: #374151;
+}
+
+.blue {
+    background: #e0ecff;
+}
+.blue span {
+    background: #3b82f6;
+}
+
+.green {
+    background: #e7f8f1;
+}
+.green span {
+    background: #10b981;
+}
+
+.orange {
+    background: #fff3e0;
+}
+.orange span {
+    background: #f59e0b;
+}
+
+.purple {
+    background: #f1eafe;
+}
+.purple span {
+    background: #8b5cf6;
+}
+
+.cta {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 500px) {
+    .onboard-card {
+        padding: 26px;
+    }
+
+    .header h1 {
+        font-size: 28px;
+    }
+}

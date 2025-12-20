@@ -1,6 +1,6 @@
 const UI = {
     showTab(tabName) {
-        document.querySelectorAll('.tab-btn').forEach(btn => {
+        document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.tab === tabName);
         });
         document.querySelectorAll('.tab-content').forEach(content => {

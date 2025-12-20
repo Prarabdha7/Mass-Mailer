@@ -1,4 +1,4 @@
-const EmailTemplates = [
+var EmailTemplates = [
     {
         name: '👋 Welcome - Stunning Gradient',
         content: `<!DOCTYPE html>
@@ -85,7 +85,7 @@ const EmailTemplates = [
 </td></tr>
 <tr><td style="padding:0 48px;">
 <p style="color:#8898aa;font-size:14px;margin:0 0 8px;">Amount paid</p>
-<p style="color:#1a1f36;font-size:36px;font-weight:600;margin:0 0 24px;">${{amount}}</p>
+<p style="color:#1a1f36;font-size:36px;font-weight:600;margin:0 0 24px;">${{ amount }}</p>
 <p style="color:#8898aa;font-size:14px;margin:0 0 4px;">Date paid</p>
 <p style="color:#1a1f36;font-size:15px;margin:0 0 24px;">{{payment_date}}</p>
 <p style="color:#8898aa;font-size:14px;margin:0 0 4px;">Payment method</p>
@@ -93,9 +93,9 @@ const EmailTemplates = [
 </td></tr>
 <tr><td style="padding:32px 48px;">
 <table width="100%" style="border-top:1px solid #e6ebf1;border-bottom:1px solid #e6ebf1;">
-<tr><td style="padding:16px 0;color:#1a1f36;font-size:14px;">{{item_name}}</td><td align="right" style="padding:16px 0;color:#1a1f36;font-size:14px;">${{item_price}}</td></tr>
+<tr><td style="padding:16px 0;color:#1a1f36;font-size:14px;">{{item_name}}</td><td align="right" style="padding:16px 0;color:#1a1f36;font-size:14px;">${{ item_price }}</td></tr>
 </table>
-<table width="100%"><tr><td style="padding:16px 0;color:#1a1f36;font-size:14px;font-weight:600;">Total</td><td align="right" style="padding:16px 0;color:#1a1f36;font-size:14px;font-weight:600;">${{amount}}</td></tr></table>
+<table width="100%"><tr><td style="padding:16px 0;color:#1a1f36;font-size:14px;font-weight:600;">Total</td><td align="right" style="padding:16px 0;color:#1a1f36;font-size:14px;font-weight:600;">${{ amount }}</td></tr></table>
 </td></tr>
 <tr><td style="padding:0 48px 40px;">
 <p style="color:#8898aa;font-size:13px;line-height:1.6;margin:0;">If you have any questions, contact us at <a href="mailto:{{support_email}}" style="color:#635bff;text-decoration:none;">{{support_email}}</a></p>

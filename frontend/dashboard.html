@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="app-container">
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -17,37 +17,42 @@
                     </svg>
                     <span>Mass Mailer</span>
                 </div>
+                <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12h18M3 6h18M3 18h18"></path>
+                    </svg>
+                </button>
             </div>
             
             <nav class="sidebar-nav">
-                <button class="nav-item active" data-tab="new-campaign">
+                <button class="nav-item active" data-tab="new-campaign" title="New Campaign">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
                     <span>New Campaign</span>
                 </button>
-                <button class="nav-item" data-tab="campaign-history">
+                <button class="nav-item" data-tab="campaign-history" title="Campaign History">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"></circle>
                         <polyline points="12 6 12 12 16 14"></polyline>
                     </svg>
                     <span>Campaign History</span>
                 </button>
-                <button class="nav-item" data-tab="templates">
+                <button class="nav-item" data-tab="templates" title="Templates">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>
                     </svg>
                     <span>Templates</span>
                 </button>
-                <button class="nav-item" data-tab="logs">
+                <button class="nav-item" data-tab="logs" title="Logs">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                     </svg>
                     <span>Logs</span>
                 </button>
-                <button class="nav-item" data-tab="settings">
+                <button class="nav-item" data-tab="settings" title="Settings">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="3"></circle>
                         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -57,7 +62,7 @@
             </nav>
             
             <div class="sidebar-footer">
-                <button class="nav-item" id="logoutBtn">
+                <button class="nav-item" id="logoutBtn" title="Logout">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                         <polyline points="16 17 21 12 16 7"></polyline>
@@ -188,24 +193,80 @@
             <section id="templates" class="tab-content">
                 <div class="page-header">
                     <h1>Email Templates</h1>
+                    <div class="page-actions">
+                        <button id="resetTemplatesBtn" class="btn btn-secondary btn-small">Reset to Defaults</button>
+                    </div>
                 </div>
-                <div class="panel">
-                    <h2>Create Template</h2>
+                
+                <div class="panel template-editor-panel">
+                    <div class="template-editor-header">
+                        <h2 id="editorTitle">Create New Template</h2>
+                        <div class="editor-tabs">
+                            <button class="editor-tab active" data-view="split">Split View</button>
+                            <button class="editor-tab" data-view="code">Code Only</button>
+                            <button class="editor-tab" data-view="preview">Preview Only</button>
+                            <button class="editor-tab" data-view="visual">✏️ Visual Edit</button>
+                        </div>
+                    </div>
                     <form id="templateForm" class="template-form">
-                        <div class="form-group">
-                            <label for="templateName">Template Name</label>
-                            <input type="text" id="templateName" required placeholder="e.g., Welcome Email">
+                        <div class="form-row">
+                            <div class="form-group" style="flex:1;">
+                                <label for="templateName">Template Name</label>
+                                <input type="text" id="templateName" required placeholder="e.g., Welcome Email">
+                            </div>
+                            <div class="form-group" style="width:200px;">
+                                <label for="previewData">Preview Data</label>
+                                <button type="button" id="editPreviewDataBtn" class="btn btn-secondary btn-small" style="width:100%;">Edit Variables</button>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="templateContent">Template HTML</label>
-                            <textarea id="templateContent" rows="10" placeholder="Your HTML template here..."></textarea>
+                        <div class="template-editor-container" id="editorContainer">
+                            <div class="editor-pane code-pane">
+                                <div class="pane-header">
+                                    <span>HTML Code</span>
+                                    <div class="pane-actions">
+                                        <button type="button" class="btn-icon" id="formatCodeBtn" title="Format Code">⚡</button>
+                                        <button type="button" class="btn-icon" id="copyCodeBtn" title="Copy Code">📋</button>
+                                    </div>
+                                </div>
+                                <textarea id="templateContent" placeholder="Write your HTML email template here..."></textarea>
+                            </div>
+                            <div class="editor-pane preview-pane">
+                                <div class="pane-header">
+                                    <span>Live Preview</span>
+                                    <div class="pane-actions">
+                                        <select id="previewDevice">
+                                            <option value="desktop">Desktop</option>
+                                            <option value="tablet">Tablet</option>
+                                            <option value="mobile">Mobile</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="preview-wrapper" id="previewWrapper">
+                                    <iframe id="templatePreview" sandbox="allow-same-origin"></iframe>
+                                </div>
+                            </div>
+                            <div class="editor-pane visual-pane" style="display:none;">
+                                <div class="pane-header">
+                                    <span>✏️ Visual Text Editor</span>
+                                    <div class="pane-actions">
+                                        <span class="visual-hint">Edit text without touching code</span>
+                                    </div>
+                                </div>
+                                <div class="visual-editor-content" id="visualEditorContent">
+                                    <p class="empty-state">Load a template to edit its text content</p>
+                                </div>
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-primary">Save Template</button>
+                        <div class="form-actions" style="margin-top:20px;">
+                            <button type="button" id="cancelEditBtn" class="btn btn-secondary" style="display:none;">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="saveTemplateBtn">Save Template</button>
+                        </div>
                     </form>
                 </div>
+                
                 <div class="panel">
-                    <h2>Saved Templates</h2>
-                    <div id="templateList" class="template-list">
+                    <h2>Saved Templates <span id="templateCount" class="badge">0</span></h2>
+                    <div class="template-grid" id="templateList">
                         <p class="empty-state">No templates saved yet.</p>
                     </div>
                 </div>
@@ -299,6 +360,18 @@
             <div class="modal-actions">
                 <button id="sendTestBtn" class="btn btn-primary">Send Test</button>
                 <button id="cancelTestBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="previewDataModal" class="modal" style="display: none;">
+        <div class="modal-content modal-large">
+            <h3>Edit Preview Variables</h3>
+            <p class="modal-description">Set sample values for template placeholders to see how your email will look.</p>
+            <div id="previewVariablesContainer" class="preview-variables-grid"></div>
+            <div class="modal-actions">
+                <button id="applyPreviewDataBtn" class="btn btn-primary">Apply & Preview</button>
+                <button id="cancelPreviewDataBtn" class="btn btn-secondary">Cancel</button>
             </div>
         </div>
     </div>

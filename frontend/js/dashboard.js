@@ -19,6 +19,7 @@ const Dashboard = {
 
     init() {
         this.loadFromStorage();
+        this.initSidebar();
         this.initTabs();
         this.initLogout();
         this.initCampaignForm();
@@ -86,6 +87,46 @@ const Dashboard = {
         if (this.logs.length > 500) this.logs = this.logs.slice(0, 500);
         this.saveToStorage();
         this.renderLogs();
+    },
+
+    initSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const appContainer = document.querySelector('.app-container');
+        
+        if (!sidebar || !appContainer) {
+            console.error('Sidebar elements not found');
+            return;
+        }
+        
+        // Load saved sidebar state
+        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        if (isCollapsed) {
+            sidebar.classList.add('collapsed');
+            appContainer.classList.add('sidebar-collapsed');
+        }
+        
+        // Toggle sidebar on button click
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const isCurrentlyCollapsed = sidebar.classList.contains('collapsed');
+                
+                if (isCurrentlyCollapsed) {
+                    sidebar.classList.remove('collapsed');
+                    appContainer.classList.remove('sidebar-collapsed');
+                    localStorage.setItem('sidebarCollapsed', 'false');
+                } else {
+                    sidebar.classList.add('collapsed');
+                    appContainer.classList.add('sidebar-collapsed');
+                    localStorage.setItem('sidebarCollapsed', 'true');
+                }
+            });
+        } else {
+            console.error('Sidebar toggle button not found');
+        }
     },
 
     initTabs() {
@@ -414,7 +455,332 @@ const Dashboard = {
 
     initTemplates() {
         const templateForm = document.getElementById('templateForm');
+        const resetBtn = document.getElementById('resetTemplatesBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const formatCodeBtn = document.getElementById('formatCodeBtn');
+        const copyCodeBtn = document.getElementById('copyCodeBtn');
+        const previewDevice = document.getElementById('previewDevice');
+        const editPreviewDataBtn = document.getElementById('editPreviewDataBtn');
+        const applyPreviewDataBtn = document.getElementById('applyPreviewDataBtn');
+        const cancelPreviewDataBtn = document.getElementById('cancelPreviewDataBtn');
+        const templateContent = document.getElementById('templateContent');
+        
         if (templateForm) templateForm.addEventListener('submit', (e) => this.saveTemplate(e));
+        if (resetBtn) resetBtn.addEventListener('click', () => this.resetTemplates());
+        if (cancelEditBtn) cancelEditBtn.addEventListener('click', () => this.cancelTemplateEdit());
+        if (formatCodeBtn) formatCodeBtn.addEventListener('click', () => this.formatTemplateCode());
+        if (copyCodeBtn) copyCodeBtn.addEventListener('click', () => this.copyTemplateCode());
+        if (previewDevice) previewDevice.addEventListener('change', (e) => this.changePreviewDevice(e.target.value));
+        if (editPreviewDataBtn) editPreviewDataBtn.addEventListener('click', () => this.openPreviewDataModal());
+        if (applyPreviewDataBtn) applyPreviewDataBtn.addEventListener('click', () => this.applyPreviewData());
+        if (cancelPreviewDataBtn) cancelPreviewDataBtn.addEventListener('click', () => this.closePreviewDataModal());
+        
+        if (templateContent) {
+            templateContent.addEventListener('input', () => this.updateTemplatePreview());
+            templateContent.addEventListener('keydown', (e) => {
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const start = templateContent.selectionStart;
+                    const end = templateContent.selectionEnd;
+                    templateContent.value = templateContent.value.substring(0, start) + '    ' + templateContent.value.substring(end);
+                    templateContent.selectionStart = templateContent.selectionEnd = start + 4;
+                }
+            });
+        }
+        
+        document.querySelectorAll('.editor-tab').forEach(tab => {
+            tab.addEventListener('click', () => this.changeEditorView(tab.dataset.view));
+        });
+        
+        this.previewData = {
+            name: 'John Doe',
+            email: 'john@example.com',
+            company_name: 'Acme Inc',
+            company_address: '123 Main St, San Francisco, CA 94102',
+            cta_link: 'https://example.com',
+            cta_text: 'Get Started',
+            unsubscribe_link: 'https://example.com/unsubscribe',
+            privacy_link: 'https://example.com/privacy',
+            support_email: 'support@example.com',
+            amount: '99.00',
+            payment_date: 'December 20, 2024',
+            payment_method: 'Visa •••• 4242',
+            item_name: 'Pro Plan - Monthly',
+            item_price: '99.00',
+            headline: 'Something amazing is here',
+            subheadline: 'Discover the future of productivity with our latest innovation.',
+            intro_text: 'We have some exciting news to share with you.',
+            feature_title: 'New Feature',
+            feature_description: 'An incredible new capability that will transform your workflow.',
+            secondary_link: 'https://example.com/learn',
+            inviter_name: 'Sarah Johnson',
+            workspace_name: 'Design Team',
+            page_icon: '📄',
+            page_title: 'Q4 Planning Document',
+            page_description: 'Strategic planning for the upcoming quarter',
+            project_name: 'my-awesome-app',
+            deployment_message: 'Your latest changes are now live.',
+            branch: 'main',
+            commit_hash: 'a1b2c3d',
+            duration: '45s',
+            preview_link: 'https://preview.example.com',
+            dashboard_link: 'https://dashboard.example.com',
+            settings_link: 'https://example.com/settings',
+            commenter_name: 'Alex Chen',
+            file_name: 'Homepage Design v2',
+            comment_text: 'Love the new color scheme! Can we try a slightly darker shade for the CTA button?',
+            reply_link: 'https://example.com/reply',
+            view_link: 'https://example.com/view',
+            digest_title: 'Here is what you missed',
+            highlight_title: 'New Integration Available',
+            highlight_description: 'Connect your favorite tools and automate your workflow.',
+            highlight_2_title: 'Performance Improvements',
+            highlight_2_description: 'We have made everything 2x faster.',
+            stat_1: '127',
+            stat_1_label: 'Tasks Done',
+            stat_2: '89%',
+            stat_2_label: 'On Track',
+            stat_3: '12',
+            stat_3_label: 'Projects',
+            currency: '$',
+            recipient_name: 'Jane Smith',
+            transaction_date: 'Dec 20, 2024 at 2:30 PM',
+            reference: 'TXN-2024-ABC123',
+            note: 'Dinner payment',
+            receipt_link: 'https://example.com/receipt',
+            workspace_name: 'Acme Corp',
+            notification_type: 'New message',
+            sender_initial: 'S',
+            sender_name: 'Sarah',
+            action_text: 'mentioned you in',
+            channel_name: '#general',
+            time_ago: '2 minutes ago',
+            message_preview: 'Hey @john, can you review the latest designs when you get a chance?',
+            feature_1_title: 'Lightning Fast',
+            feature_1_desc: 'Built for speed and performance.',
+            feature_2_title: 'Secure',
+            feature_2_desc: 'Enterprise-grade security.',
+            feature_3_title: 'Scalable',
+            feature_3_desc: 'Grows with your business.',
+            sale_label: 'End of Season',
+            sale_description: 'Our biggest sale of the year. Do not miss out on incredible savings.',
+            discount: '50',
+            promo_code: 'SAVE50',
+            shop_link: 'https://example.com/shop',
+            event_name: 'Annual Conference 2025',
+            event_date: 'January 15, 2025',
+            event_time: '2:00 PM EST',
+            event_venue: 'Grand Hotel, New York',
+            product_name: 'Product Pro',
+            product_tagline: 'The future is here',
+            expiry_date: 'December 31, 2025',
+            sender_title: 'Marketing Manager',
+            meeting_date: 'December 20, 2024',
+            meeting_time: '10:00 AM',
+            reminder_subject: 'Your subscription renewal',
+            due_date: 'December 25, 2024',
+            time_remaining: '5 days',
+            feedback_link: 'https://example.com/feedback'
+        };
+        
+        this.editingTemplateIndex = null;
+    },
+
+    changeEditorView(view) {
+        document.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'));
+        document.querySelector(`.editor-tab[data-view="${view}"]`).classList.add('active');
+        
+        const container = document.getElementById('editorContainer');
+        container.classList.remove('code-only', 'preview-only', 'visual-mode');
+        
+        if (view === 'code') container.classList.add('code-only');
+        if (view === 'preview') container.classList.add('preview-only');
+        if (view === 'visual') {
+            container.classList.add('visual-mode');
+            this.renderVisualEditor();
+        }
+    },
+
+    renderVisualEditor() {
+        const content = document.getElementById('templateContent').value;
+        const container = document.getElementById('visualEditorContent');
+        
+        if (!content.trim()) {
+            container.innerHTML = '<p class="empty-state">Load a template first to edit its text content</p>';
+            return;
+        }
+        
+        const textElements = this.extractTextElements(content);
+        
+        if (textElements.length === 0) {
+            container.innerHTML = '<p class="empty-state">No editable text found in this template</p>';
+            return;
+        }
+        
+        let html = '<div class="visual-section"><div class="visual-section-title"><span class="section-icon">📝</span> Editable Text Content</div>';
+        
+        textElements.forEach((el, idx) => {
+            const fieldType = el.tag.match(/^h[1-6]$/i) ? 'heading' : (el.tag === 'a' ? 'link' : 'paragraph');
+            const typeLabel = el.tag.match(/^h[1-6]$/i) ? `Heading ${el.tag.charAt(1)}` : (el.tag === 'a' ? 'Link Text' : 'Text');
+            const placeholders = el.text.match(/\{\{(\w+)\}\}/g) || [];
+            const placeholderTags = placeholders.map(p => `<span class="visual-placeholder-tag">${p}</span>`).join('');
+            
+            html += `
+                <div class="visual-field" data-index="${idx}">
+                    <div class="visual-field-label">
+                        <span>${typeLabel}</span>
+                        <span class="field-type type-${fieldType}">${el.tag.toUpperCase()}</span>
+                        ${placeholderTags}
+                    </div>
+                    ${el.text.length > 100 ? 
+                        `<textarea class="visual-input" data-index="${idx}">${this.escapeHtml(el.text)}</textarea>` :
+                        `<input type="text" class="visual-input" data-index="${idx}" value="${this.escapeHtml(el.text)}">`
+                    }
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        html += `<div class="visual-apply-btn">
+            <button type="button" class="btn btn-primary" id="applyVisualChanges">Apply Changes to Template</button>
+        </div>`;
+        
+        container.innerHTML = html;
+        
+        document.getElementById('applyVisualChanges')?.addEventListener('click', () => this.applyVisualChanges());
+        
+        container.querySelectorAll('.visual-input').forEach(input => {
+            input.addEventListener('input', () => {
+                input.closest('.visual-field').classList.add('modified');
+            });
+        });
+    },
+
+    extractTextElements(html) {
+        const elements = [];
+        const tagRegex = /<(h[1-6]|p|span|a|td|li|strong|em|b|i)[^>]*>([^<]+)<\/\1>/gi;
+        let match;
+        
+        while ((match = tagRegex.exec(html)) !== null) {
+            const text = match[2].trim();
+            if (text && text.length > 1 && !/^[\s\d\.\,\;\:\!\?\-\_\=\+\*\&\%\$\#\@]+$/.test(text)) {
+                elements.push({
+                    tag: match[1].toLowerCase(),
+                    text: text,
+                    fullMatch: match[0],
+                    index: match.index
+                });
+            }
+        }
+        
+        return elements;
+    },
+
+    applyVisualChanges() {
+        let content = document.getElementById('templateContent').value;
+        const originalElements = this.extractTextElements(content);
+        const inputs = document.querySelectorAll('.visual-input');
+        
+        const changes = [];
+        inputs.forEach(input => {
+            const idx = parseInt(input.dataset.index);
+            const newText = input.value;
+            const original = originalElements[idx];
+            
+            if (original && original.text !== newText) {
+                changes.push({ original, newText });
+            }
+        });
+        
+        changes.reverse().forEach(change => {
+            const oldTag = change.original.fullMatch;
+            const newTag = oldTag.replace(change.original.text, change.newText);
+            content = content.replace(oldTag, newTag);
+        });
+        
+        document.getElementById('templateContent').value = content;
+        this.updateTemplatePreview();
+        
+        UI.showSuccess(`Applied ${changes.length} text change${changes.length !== 1 ? 's' : ''}`);
+        
+        this.renderVisualEditor();
+    },
+
+    changePreviewDevice(device) {
+        const wrapper = document.getElementById('previewWrapper');
+        wrapper.classList.remove('device-desktop', 'device-tablet', 'device-mobile');
+        if (device !== 'desktop') wrapper.classList.add(`device-${device}`);
+    },
+
+    updateTemplatePreview() {
+        const content = document.getElementById('templateContent').value;
+        const iframe = document.getElementById('templatePreview');
+        if (!iframe) return;
+        
+        let rendered = content;
+        const placeholders = content.match(/\{\{(\w+)\}\}/g) || [];
+        placeholders.forEach(p => {
+            const key = p.replace(/\{\{|\}\}/g, '');
+            const value = this.previewData[key] || `[${key}]`;
+            rendered = rendered.replace(new RegExp(p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), value);
+        });
+        
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        doc.open();
+        doc.write(rendered);
+        doc.close();
+    },
+
+    openPreviewDataModal() {
+        const content = document.getElementById('templateContent').value;
+        const placeholders = [...new Set((content.match(/\{\{(\w+)\}\}/g) || []).map(p => p.replace(/\{\{|\}\}/g, '')))];
+        
+        const container = document.getElementById('previewVariablesContainer');
+        if (placeholders.length === 0) {
+            container.innerHTML = '<p style="color:#999;grid-column:1/-1;">No placeholders found in template. Use {{variable_name}} syntax.</p>';
+        } else {
+            container.innerHTML = placeholders.map(p => `
+                <div class="form-group">
+                    <label>{{${p}}}</label>
+                    <input type="text" id="previewVar_${p}" value="${this.previewData[p] || ''}" placeholder="Sample value">
+                </div>
+            `).join('');
+        }
+        
+        document.getElementById('previewDataModal').style.display = 'flex';
+    },
+
+    applyPreviewData() {
+        const inputs = document.querySelectorAll('#previewVariablesContainer input');
+        inputs.forEach(input => {
+            const key = input.id.replace('previewVar_', '');
+            this.previewData[key] = input.value;
+        });
+        this.closePreviewDataModal();
+        this.updateTemplatePreview();
+    },
+
+    closePreviewDataModal() {
+        document.getElementById('previewDataModal').style.display = 'none';
+    },
+
+    formatTemplateCode() {
+        const textarea = document.getElementById('templateContent');
+        let code = textarea.value;
+        code = code.replace(/></g, '>\n<');
+        code = code.replace(/\n\s*\n/g, '\n');
+        textarea.value = code;
+        this.updateTemplatePreview();
+        UI.showSuccess('Code formatted!');
+    },
+
+    copyTemplateCode() {
+        const textarea = document.getElementById('templateContent');
+        navigator.clipboard.writeText(textarea.value).then(() => {
+            UI.showSuccess('Code copied to clipboard!');
+        }).catch(() => {
+            UI.showError('Failed to copy code');
+        });
     },
 
     saveTemplate(e) {
@@ -425,35 +791,105 @@ const Dashboard = {
             UI.showError('Template name and content are required');
             return;
         }
-        this.templates.push({ name, content, createdAt: new Date().toISOString() });
+        
+        if (this.editingTemplateIndex !== null) {
+            this.templates[this.editingTemplateIndex] = { 
+                name, 
+                content, 
+                createdAt: this.templates[this.editingTemplateIndex].createdAt,
+                updatedAt: new Date().toISOString()
+            };
+            this.editingTemplateIndex = null;
+            document.getElementById('editorTitle').textContent = 'Create New Template';
+            document.getElementById('cancelEditBtn').style.display = 'none';
+            document.getElementById('saveTemplateBtn').textContent = 'Save Template';
+            UI.showSuccess('Template updated!');
+        } else {
+            this.templates.push({ name, content, createdAt: new Date().toISOString() });
+            UI.showSuccess('Template saved!');
+        }
+        
         this.saveToStorage();
         this.renderTemplateList();
         this.populateTemplateSelect();
         document.getElementById('templateName').value = '';
         document.getElementById('templateContent').value = '';
-        UI.showSuccess('Template saved!');
+        this.updateTemplatePreview();
         this.addLog('campaign', 'Template saved: ' + name);
+    },
+
+    editTemplate(idx) {
+        const template = this.templates[idx];
+        if (!template) return;
+        
+        this.editingTemplateIndex = idx;
+        document.getElementById('templateName').value = template.name;
+        document.getElementById('templateContent').value = template.content;
+        document.getElementById('editorTitle').textContent = 'Edit Template';
+        document.getElementById('cancelEditBtn').style.display = 'inline-block';
+        document.getElementById('saveTemplateBtn').textContent = 'Update Template';
+        
+        this.updateTemplatePreview();
+        UI.showTab('templates');
+        document.getElementById('templateName').focus();
+    },
+
+    cancelTemplateEdit() {
+        this.editingTemplateIndex = null;
+        document.getElementById('templateName').value = '';
+        document.getElementById('templateContent').value = '';
+        document.getElementById('editorTitle').textContent = 'Create New Template';
+        document.getElementById('cancelEditBtn').style.display = 'none';
+        document.getElementById('saveTemplateBtn').textContent = 'Save Template';
+        this.updateTemplatePreview();
+    },
+
+    previewTemplate(idx) {
+        const template = this.templates[idx];
+        if (!template) return;
+        
+        document.getElementById('templateContent').value = template.content;
+        this.updateTemplatePreview();
+        this.changeEditorView('preview');
+        UI.showTab('templates');
     },
 
     renderTemplateList() {
         const container = document.getElementById('templateList');
+        const countBadge = document.getElementById('templateCount');
         if (!container) return;
+        
+        if (countBadge) countBadge.textContent = this.templates.length;
+        
         if (this.templates.length === 0) {
             container.innerHTML = '<p class="empty-state">No templates saved yet.</p>';
             return;
         }
-        container.innerHTML = this.templates.map((t, i) => `
-            <div class="template-item">
-                <div class="template-info">
-                    <strong>${t.name}</strong>
-                    <span class="template-meta">${new Date(t.createdAt).toLocaleDateString()}</span>
+        
+        container.innerHTML = this.templates.map((t, i) => {
+            const previewHtml = t.content.substring(0, 2000);
+            return `
+            <div class="template-card">
+                <div class="template-card-preview">
+                    <iframe srcdoc="${this.escapeHtml(previewHtml)}" sandbox></iframe>
                 </div>
-                <div class="template-actions">
-                    <button class="btn btn-small" onclick="Dashboard.useTemplate(${i})">Use</button>
-                    <button class="btn btn-small btn-danger" onclick="Dashboard.deleteTemplate(${i})">Delete</button>
+                <div class="template-card-body">
+                    <div class="template-card-name">${this.escapeHtml(t.name)}</div>
+                    <div class="template-card-date">${new Date(t.createdAt).toLocaleDateString()}</div>
+                    <div class="template-card-actions">
+                        <button class="btn btn-secondary btn-small" onclick="Dashboard.previewTemplate(${i})">Preview</button>
+                        <button class="btn btn-primary btn-small" onclick="Dashboard.editTemplate(${i})">Edit</button>
+                        <button class="btn btn-small" onclick="Dashboard.useTemplate(${i})">Use</button>
+                        <button class="btn btn-danger btn-small" onclick="Dashboard.deleteTemplate(${i})">×</button>
+                    </div>
                 </div>
             </div>
-        `).join('');
+        `}).join('');
+    },
+
+    escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     },
 
     useTemplate(idx) {

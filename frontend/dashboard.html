@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mass Mailer Dashboard</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    <span>Mass Mailer</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-tab="new-campaign">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>New Campaign</span>
+                </button>
+                <button class="nav-item" data-tab="campaign-history">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <span>Campaign History</span>
+                </button>
+                <button class="nav-item" data-tab="templates">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    <span>Templates</span>
+                </button>
+                <button class="nav-item" data-tab="logs">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span>Logs</span>
+                </button>
+                <button class="nav-item" data-tab="settings">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                    <span>Settings</span>
+                </button>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button class="nav-item" id="logoutBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <section id="new-campaign" class="tab-content active">
+                <div class="page-header">
+                    <h1>New Campaign</h1>
+                </div>
+                <div class="panel">
+                    <form id="campaignForm" class="campaign-form">
+                        <div class="form-group">
+                            <label for="campaignName">Campaign Name</label>
+                            <input type="text" id="campaignName" name="campaignName" required placeholder="e.g., March Newsletter">
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">Email Subject</label>
+                            <input type="text" id="subject" name="subject" required placeholder="e.g., Your Weekly Update">
+                        </div>
+                        <div class="form-group">
+                            <label for="templateSelect">Load Template</label>
+                            <select id="templateSelect">
+                                <option value="">-- Select a template --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="template">Email Template (HTML)</label>
+                            <textarea id="template" name="template" rows="12" placeholder="Use {{name}}, {{email}} or any CSV column as placeholders"></textarea>
+                            <div id="placeholderPreview" class="placeholder-preview"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="csvFile">Recipients CSV</label>
+                            <input type="file" id="csvFile" name="csvFile" accept=".csv">
+                            <small>CSV must have 'email' column. Optional: 'name' and other columns for personalization.</small>
+                            <div id="csvPreview" class="csv-preview"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="batchSize">Batch Size</label>
+                                <input type="number" id="batchSize" name="batchSize" value="10" min="1" max="100">
+                            </div>
+                            <div class="form-group">
+                                <label for="delaySeconds">Delay (seconds)</label>
+                                <input type="number" id="delaySeconds" name="delaySeconds" value="2" min="0" step="0.5">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" id="testEmailBtn" class="btn btn-secondary">Send Test Email</button>
+                            <button type="submit" class="btn btn-primary">Validate & Preview</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="validationPanel" class="panel validation-panel" style="display: none;">
+                    <h2>Email Validation Results</h2>
+                    <div class="validation-summary">
+                        <span class="valid-count">Valid: <strong id="validCount">0</strong></span>
+                        <span class="invalid-count">Invalid: <strong id="invalidCount">0</strong></span>
+                    </div>
+                    <div id="validationResults" class="validation-results"></div>
+                    <div class="validation-actions">
+                        <button id="proceedBtn" class="btn btn-primary">Send to Valid Emails</button>
+                        <button id="cancelValidationBtn" class="btn btn-secondary">Cancel</button>
+                    </div>
+                </div>
+
+                <div id="progressPanel" class="panel progress-panel" style="display: none;">
+                    <h2>Sending Progress</h2>
+                    <div class="progress-bar-container">
+                        <div id="progressBar" class="progress-bar"></div>
+                    </div>
+                    <div class="progress-stats">
+                        <span>Sent: <strong id="sentCount">0</strong></span>
+                        <span>Failed: <strong id="failedCount">0</strong></span>
+                        <span>Pending: <strong id="pendingCount">0</strong></span>
+                    </div>
+                    <div id="progressStatus" class="progress-status"></div>
+                </div>
+            </section>
+
+            <section id="campaign-history" class="tab-content">
+                <div class="page-header">
+                    <h1>Campaign History</h1>
+                </div>
+                <div class="panel">
+                    <div id="campaignList" class="campaign-list">
+                        <p class="empty-state">No campaigns yet. Create your first campaign!</p>
+                    </div>
+                </div>
+                
+                <div id="reportPanel" class="panel" style="display: none;">
+                    <h2>Delivery Report: <span id="reportCampaignName"></span></h2>
+                    <div class="report-filters">
+                        <label>Filter:</label>
+                        <select id="statusFilter">
+                            <option value="all">All</option>
+                            <option value="sent">Sent</option>
+                            <option value="failed">Failed</option>
+                        </select>
+                        <button id="downloadCsvBtn" class="btn btn-secondary">Download CSV</button>
+                    </div>
+                    <div class="report-summary">
+                        <span>Total: <strong id="totalRecords">0</strong></span>
+                        <span>Sent: <strong id="sentRecords">0</strong></span>
+                        <span>Failed: <strong id="failedRecords">0</strong></span>
+                    </div>
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th>Reason</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="templates" class="tab-content">
+                <div class="page-header">
+                    <h1>Email Templates</h1>
+                </div>
+                <div class="panel">
+                    <h2>Create Template</h2>
+                    <form id="templateForm" class="template-form">
+                        <div class="form-group">
+                            <label for="templateName">Template Name</label>
+                            <input type="text" id="templateName" required placeholder="e.g., Welcome Email">
+                        </div>
+                        <div class="form-group">
+                            <label for="templateContent">Template HTML</label>
+                            <textarea id="templateContent" rows="10" placeholder="Your HTML template here..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Template</button>
+                    </form>
+                </div>
+                <div class="panel">
+                    <h2>Saved Templates</h2>
+                    <div id="templateList" class="template-list">
+                        <p class="empty-state">No templates saved yet.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="logs" class="tab-content">
+                <div class="page-header">
+                    <h1>Activity Logs</h1>
+                    <div class="page-actions">
+                        <button id="refreshLogsBtn" class="btn btn-secondary btn-small">Refresh</button>
+                        <button id="clearLogsBtn" class="btn btn-danger btn-small">Clear Logs</button>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="logs-filters">
+                        <select id="logTypeFilter">
+                            <option value="all">All Types</option>
+                            <option value="campaign">Campaigns</option>
+                            <option value="email">Emails</option>
+                            <option value="error">Errors</option>
+                            <option value="auth">Authentication</option>
+                        </select>
+                        <input type="date" id="logDateFilter" placeholder="Filter by date">
+                    </div>
+                    <div id="logsList" class="logs-list">
+                        <p class="empty-state">No logs yet.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="settings" class="tab-content">
+                <div class="page-header">
+                    <h1>Settings</h1>
+                </div>
+                <div class="panel">
+                    <h2>Email Validation Settings</h2>
+                    <div class="form-group">
+                        <label for="whitelistDomains">Whitelisted Domains</label>
+                        <textarea id="whitelistDomains" rows="4" placeholder="Enter domains (one per line)&#10;e.g., srmist.edu.in&#10;gmail.com&#10;company.com"></textarea>
+                        <small>Emails from these domains will always be marked as valid (skip MX check)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="blacklistDomains">Blacklisted Domains</label>
+                        <textarea id="blacklistDomains" rows="4" placeholder="Enter domains to block (one per line)&#10;e.g., tempmail.com&#10;throwaway.com"></textarea>
+                        <small>Emails from these domains will always be marked as invalid</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="customValidEmails">Custom Valid Emails</label>
+                        <textarea id="customValidEmails" rows="4" placeholder="Enter specific emails to whitelist (one per line)&#10;e.g., special@custom-domain.com"></textarea>
+                        <small>These specific emails will always be marked as valid</small>
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="skipMxCheck">
+                            Skip MX record validation (faster, less strict)
+                        </label>
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="allowPlusAddressing" checked>
+                            Allow plus addressing (e.g., user+tag@gmail.com)
+                        </label>
+                    </div>
+                    <button id="saveSettingsBtn" class="btn btn-primary">Save Settings</button>
+                </div>
+                <div class="panel">
+                    <h2>Default Campaign Settings</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="defaultBatchSize">Default Batch Size</label>
+                            <input type="number" id="defaultBatchSize" value="10" min="1" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label for="defaultDelay">Default Delay (seconds)</label>
+                            <input type="number" id="defaultDelay" value="2" min="0" step="0.5">
+                        </div>
+                    </div>
+                    <button id="saveCampaignSettingsBtn" class="btn btn-primary">Save Campaign Settings</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="testEmailModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>Send Test Email</h3>
+            <div class="form-group">
+                <label for="testEmail">Send test to:</label>
+                <input type="email" id="testEmail" required placeholder="your@email.com">
+            </div>
+            <div class="modal-actions">
+                <button id="sendTestBtn" class="btn btn-primary">Send Test</button>
+                <button id="cancelTestBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/campaign.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/email-templates.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

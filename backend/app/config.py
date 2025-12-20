@@ -1,5 +1,6 @@
 import os
 import yaml
+import secrets
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -14,8 +15,12 @@ def load_yaml_config():
 
 yaml_config = load_yaml_config()
 
+def generate_secure_key():
+    return secrets.token_hex(32)
+
 class Config:
-    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key')
+    _secret = os.getenv('SECRET_KEY', '')
+    SECRET_KEY = _secret if _secret and _secret != 'dev-secret-key' else generate_secure_key()
     
     SERVER_HOST = yaml_config.get('server', {}).get('host', '0.0.0.0')
     SERVER_PORT = yaml_config.get('server', {}).get('port', 5000)
@@ -32,6 +37,13 @@ class Config:
     EMAIL_BATCH_SIZE = yaml_config.get('email', {}).get('batch_size', 10)
     EMAIL_DELAY_SECONDS = yaml_config.get('email', {}).get('delay_seconds', 1.0)
     EMAIL_MAX_RETRIES = yaml_config.get('email', {}).get('max_retries', 3)
+    
+    ADMIN_ACCESS_TOKEN = os.getenv('ADMIN_ACCESS_TOKEN', '')
+    
+    RATE_LIMIT_PER_MINUTE = yaml_config.get('rate_limiting', {}).get('requests_per_minute', 60)
+    RATE_LIMIT_BURST = yaml_config.get('rate_limiting', {}).get('burst_limit', 10)
+    
+    SESSION_STORAGE_FILE = yaml_config.get('session', {}).get('storage_file', 'sessions.json')
 
 def get_smtp_config_from_env():
     from app.services.smtp_client import SMTPConfig

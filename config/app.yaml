@@ -1,7 +1,7 @@
 server:
   host: "0.0.0.0"
   port: 5000
-  debug: true
+  debug: false
 
 email:
   batch_size: 10
@@ -11,3 +11,7 @@ email:
 rate_limiting:
   requests_per_minute: 60
   burst_limit: 10
+
+session:
+  storage_file: "sessions.json"
+  cleanup_interval: 3600

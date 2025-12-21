@@ -1,211 +1,276 @@
 const Dashboard = {
-    currentCampaignId: null,
-    validRecipients: [],
-    allDeliveryRecords: [],
-    pollInterval: null,
-    csvData: null,
-    templates: [],
-    campaigns: [],
-    logs: [],
-    settings: {
-        whitelistDomains: [],
-        blacklistDomains: [],
-        customValidEmails: [],
-        skipMxCheck: false,
-        allowPlusAddressing: true,
-        defaultBatchSize: 10,
-        defaultDelay: 2
-    },
+        currentCampaignId: null,
+        validRecipients: [],
+        allDeliveryRecords: [],
+        pollInterval: null,
+        csvData: null,
+        templates: [],
+        campaigns: [],
+        logs: [],
+        settings: {
+            whitelistDomains: [],
+            blacklistDomains: [],
+            customValidEmails: [],
+            skipMxCheck: false,
+            allowPlusAddressing: true,
+            defaultBatchSize: 10,
+            defaultDelay: 2
+        },
 
-    init() {
-        this.loadFromStorage();
-        this.initSidebar();
-        this.initTabs();
-        this.initLogout();
-        this.initCampaignForm();
-        this.initTemplates();
-        this.initDeliveryReport();
-        this.initTestEmail();
-        this.initLogs();
-        this.initSettings();
-        this.renderCampaignList();
-        this.renderTemplateList();
-        this.populateTemplateSelect();
-        this.renderLogs();
-        this.applyDefaultSettings();
-    },
+        async init() {
+            console.log('Dashboard.init() called');
+            this.initSidebar();
+            this.initTabs();
+            this.initLogout();
+            this.initCampaignForm();
+            this.initTemplates();
+            this.initDeliveryReport();
+            this.initTestEmail();
+            this.initLogs();
+            this.initSettings();
 
-    loadFromStorage() {
-        try {
-            this.templates = JSON.parse(localStorage.getItem('mailer_templates') || '[]');
-            this.campaigns = JSON.parse(localStorage.getItem('mailer_campaigns') || '[]');
-            this.logs = JSON.parse(localStorage.getItem('mailer_logs') || '[]');
-            const savedSettings = JSON.parse(localStorage.getItem('mailer_settings') || '{}');
-            this.settings = { ...this.settings, ...savedSettings };
-            
-            if (this.templates.length === 0) {
-                this.templates = typeof EmailTemplates !== 'undefined' ? [...EmailTemplates] : [];
-                this.saveToStorage();
-            }
-        } catch (e) {
-            this.templates = typeof EmailTemplates !== 'undefined' ? [...EmailTemplates] : [];
-            this.campaigns = [];
-            this.logs = [];
-        }
-    },
+            await this.loadFromStorage();
+            console.log(`After loadFromStorage: this.templates.length = ${this.templates.length}`);
 
-    resetTemplates() {
-        if (typeof EmailTemplates !== 'undefined') {
-            this.templates = [...EmailTemplates];
-            this.saveToStorage();
+            this.renderCampaignList();
             this.renderTemplateList();
             this.populateTemplateSelect();
-            UI.showSuccess('Templates reset to defaults!');
-        }
-    },
+            this.renderLogs();
+            this.applyDefaultSettings();
 
-    getDefaultTemplates() {
-        return typeof EmailTemplates !== 'undefined' ? [...EmailTemplates] : [];
-    },
-
-    saveToStorage() {
-        localStorage.setItem('mailer_templates', JSON.stringify(this.templates));
-        localStorage.setItem('mailer_campaigns', JSON.stringify(this.campaigns));
-        localStorage.setItem('mailer_logs', JSON.stringify(this.logs));
-        localStorage.setItem('mailer_settings', JSON.stringify(this.settings));
-    },
-
-    addLog(type, message, details = null) {
-        const log = {
-            id: Date.now(),
-            type: type,
-            message: message,
-            details: details,
-            timestamp: new Date().toISOString()
-        };
-        this.logs.unshift(log);
-        if (this.logs.length > 500) this.logs = this.logs.slice(0, 500);
-        this.saveToStorage();
-        this.renderLogs();
-    },
-
-    initSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const appContainer = document.querySelector('.app-container');
-        
-        if (!sidebar || !appContainer) {
-            console.error('Sidebar elements not found');
-            return;
-        }
-        
-        // Load saved sidebar state
-        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-        if (isCollapsed) {
-            sidebar.classList.add('collapsed');
-            appContainer.classList.add('sidebar-collapsed');
-        }
-        
-        // Toggle sidebar on button click
-        if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const isCurrentlyCollapsed = sidebar.classList.contains('collapsed');
-                
-                if (isCurrentlyCollapsed) {
-                    sidebar.classList.remove('collapsed');
-                    appContainer.classList.remove('sidebar-collapsed');
-                    localStorage.setItem('sidebarCollapsed', 'false');
+            // Verify templates loaded - if still 0, try direct access to EmailTemplates
+            if (this.templates.length === 0) {
+                console.warn('No templates in this.templates after loading. Checking EmailTemplates directly...');
+                if (typeof EmailTemplates !== 'undefined' && Array.isArray(EmailTemplates) && EmailTemplates.length > 0) {
+                    console.warn(`EmailTemplates array exists with ${EmailTemplates.length} items, but wasn't loaded properly. Forcing reload...`);
+                    this.templates = EmailTemplates.map(t => ({...t }));
+                    console.log(`Forced reload: this.templates.length = ${this.templates.length}`);
+                    this.renderTemplateList();
+                    this.populateTemplateSelect();
                 } else {
-                    sidebar.classList.add('collapsed');
-                    appContainer.classList.add('sidebar-collapsed');
-                    localStorage.setItem('sidebarCollapsed', 'true');
+                    console.error('EmailTemplates is not available or empty:', {
+                        defined: typeof EmailTemplates !== 'undefined',
+                        isArray: Array.isArray(EmailTemplates),
+                        length: typeof EmailTemplates !== 'undefined' ? EmailTemplates.length : 'N/A'
+                    });
                 }
-            });
-        } else {
-            console.error('Sidebar toggle button not found');
-        }
-    },
+            } else {
+                console.log(`✓ Successfully loaded ${this.templates.length} templates`);
+            }
+        },
 
-    initTabs() {
-        document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                UI.showTab(btn.dataset.tab);
-            });
-        });
-    },
+        async loadFromStorage() {
+            try {
+                this.campaigns = JSON.parse(localStorage.getItem('mailer_campaigns') || '[]');
+                const savedSettings = JSON.parse(localStorage.getItem('mailer_settings') || '{}');
+                this.settings = {...this.settings, ...savedSettings };
+            } catch (e) {
+                this.campaigns = [];
+            }
 
-    initLogout() {
-        const logoutBtn = document.getElementById('logoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', async () => {
-                await Auth.logout();
-                window.location.href = '/login';
-            });
-        }
-    },
+            // Load default templates from hardcoded array
+            // Check if EmailTemplates is available (should be loaded from email-templates.js)
+            if (typeof EmailTemplates === 'undefined') {
+                console.error('EmailTemplates is not defined! Make sure email-templates.js is loaded before dashboard.js');
+            }
 
-    initCampaignForm() {
-        const csvFileInput = document.getElementById('csvFile');
-        const templateInput = document.getElementById('template');
-        const campaignForm = document.getElementById('campaignForm');
-        const templateSelect = document.getElementById('templateSelect');
+            const defaultTemplates = (typeof EmailTemplates !== 'undefined' && Array.isArray(EmailTemplates) && EmailTemplates.length > 0) ?
+                EmailTemplates.map(t => ({...t })) // Create copies to avoid mutations
+                :
+                [];
 
-        if (csvFileInput) csvFileInput.addEventListener('change', (e) => this.handleCSVUpload(e));
-        if (templateInput) templateInput.addEventListener('input', (e) => this.handleTemplateInput(e));
-        if (campaignForm) campaignForm.addEventListener('submit', (e) => this.handleFormSubmit(e));
-        if (templateSelect) templateSelect.addEventListener('change', (e) => this.loadSelectedTemplate(e));
-    },
+            // Start with default templates
+            this.templates = [...defaultTemplates];
+            console.log(`Initialized with ${defaultTemplates.length} default templates`, defaultTemplates.length > 0 ? '(EmailTemplates loaded)' : '(EmailTemplates empty or undefined)');
 
-    populateTemplateSelect() {
-        const select = document.getElementById('templateSelect');
-        if (!select) return;
-        select.innerHTML = '<option value="">-- Select a template --</option>';
-        this.templates.forEach((t, i) => {
-            const opt = document.createElement('option');
-            opt.value = i;
-            opt.textContent = t.name;
-            select.appendChild(opt);
-        });
-    },
+            // Load custom templates from backend
+            try {
+                const response = await API.getCustomTemplates();
+                if (response && response.templates && Array.isArray(response.templates)) {
+                    const customTemplates = response.templates;
+                    this.templates = [...defaultTemplates, ...customTemplates];
+                    console.log(`Loaded ${defaultTemplates.length} default templates and ${customTemplates.length} custom templates from backend`);
+                } else {
+                    console.warn('Backend returned invalid template format:', response);
+                }
+            } catch (e) {
+                console.error('Failed to load custom templates from backend:', e.message || e);
+                // Continue with default templates only if backend call fails
+                console.log(`Using ${defaultTemplates.length} default templates only (backend unavailable)`);
+            }
 
-    loadSelectedTemplate(e) {
-        const idx = e.target.value;
-        if (idx === '') return;
-        const template = this.templates[idx];
-        if (template) {
-            document.getElementById('template').value = template.content;
-            this.handleTemplateInput({ target: { value: template.content } });
-        }
-    },
+            // Ensure we have templates
+            if (this.templates.length === 0) {
+                console.error('WARNING: No templates available! EmailTemplates array may not be loaded.');
+            }
 
-    async handleCSVUpload(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        const csvPreview = document.getElementById('csvPreview');
-        
-        csvPreview.innerHTML = '<p class="loading">Parsing CSV file...</p>';
-        
-        try {
-            this.csvData = await Campaign.parseCSV(file);
-            const { headers, rows, warnings } = this.csvData;
-            
-            if (rows.length === 0) {
-                csvPreview.innerHTML = '<p class="error">No data rows found in CSV</p>';
+            try {
+                const response = await API.getLogs();
+                this.logs = (response.logs || []).reverse();
+            } catch (e) {
+                this.logs = [];
+            }
+        },
+
+        async resetTemplates() {
+            if (confirm('This will remove all your custom templates. Default templates will remain. Continue?')) {
+                try {
+                    const response = await API.getCustomTemplates();
+                    const customTemplates = response.templates || [];
+                    for (const t of customTemplates) {
+                        if (t.id) await API.deleteCustomTemplate(t.id);
+                    }
+                } catch (e) {}
+                this.templates = typeof EmailTemplates !== 'undefined' ? [...EmailTemplates] : [];
+                this.renderTemplateList();
+                this.populateTemplateSelect();
+                UI.showSuccess('Custom templates cleared! ' + this.templates.length + ' default templates loaded.');
+                this.addLog('campaign', 'Custom templates cleared');
+            }
+        },
+
+        getDefaultTemplates() {
+            return typeof EmailTemplates !== 'undefined' ? [...EmailTemplates] : [];
+        },
+
+        saveToStorage() {
+            localStorage.setItem('mailer_campaigns', JSON.stringify(this.campaigns));
+            localStorage.setItem('mailer_settings', JSON.stringify(this.settings));
+        },
+
+        async addLog(type, message, details = null) {
+            const log = {
+                id: Date.now(),
+                type: type,
+                message: message,
+                details: details,
+                timestamp: new Date().toISOString()
+            };
+            this.logs.unshift(log);
+            if (this.logs.length > 500) this.logs = this.logs.slice(0, 500);
+            this.renderLogs();
+            try {
+                await API.addLog({ type, message, details });
+            } catch (e) {}
+        },
+
+        initSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const appContainer = document.querySelector('.app-container');
+
+            if (!sidebar || !appContainer) {
+                console.error('Sidebar elements not found');
                 return;
             }
-            
-            const emailCol = headers.find(h => h.toLowerCase().includes('email')) || headers[0];
-            const nameCol = headers.find(h => h.toLowerCase().includes('name')) || headers[1] || headers[0];
-            
-            let previewHtml = `<p><strong>${rows.length}</strong> recipients found</p>`;
-            
-            if (warnings && warnings.length > 0) {
-                previewHtml += `<div class="csv-warnings">
+
+            // Load saved sidebar state
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (isCollapsed) {
+                sidebar.classList.add('collapsed');
+                appContainer.classList.add('sidebar-collapsed');
+            }
+
+            // Toggle sidebar on button click
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const isCurrentlyCollapsed = sidebar.classList.contains('collapsed');
+
+                    if (isCurrentlyCollapsed) {
+                        sidebar.classList.remove('collapsed');
+                        appContainer.classList.remove('sidebar-collapsed');
+                        localStorage.setItem('sidebarCollapsed', 'false');
+                    } else {
+                        sidebar.classList.add('collapsed');
+                        appContainer.classList.add('sidebar-collapsed');
+                        localStorage.setItem('sidebarCollapsed', 'true');
+                    }
+                });
+            } else {
+                console.error('Sidebar toggle button not found');
+            }
+        },
+
+        initTabs() {
+            document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    UI.showTab(btn.dataset.tab);
+                });
+            });
+        },
+
+        initLogout() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async() => {
+                    await Auth.logout();
+                    window.location.href = '/login';
+                });
+            }
+        },
+
+        initCampaignForm() {
+            const csvFileInput = document.getElementById('csvFile');
+            const templateInput = document.getElementById('template');
+            const campaignForm = document.getElementById('campaignForm');
+            const templateSelect = document.getElementById('templateSelect');
+
+            if (csvFileInput) csvFileInput.addEventListener('change', (e) => this.handleCSVUpload(e));
+            if (templateInput) templateInput.addEventListener('input', (e) => this.handleTemplateInput(e));
+            if (campaignForm) campaignForm.addEventListener('submit', (e) => this.handleFormSubmit(e));
+            if (templateSelect) templateSelect.addEventListener('change', (e) => this.loadSelectedTemplate(e));
+        },
+
+        populateTemplateSelect() {
+            const select = document.getElementById('templateSelect');
+            if (!select) return;
+            select.innerHTML = '<option value="">-- Select a template --</option>';
+            this.templates.forEach((t, i) => {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = t.name;
+                select.appendChild(opt);
+            });
+        },
+
+        loadSelectedTemplate(e) {
+            const idx = e.target.value;
+            if (idx === '') return;
+            const template = this.templates[idx];
+            if (template) {
+                document.getElementById('template').value = template.content;
+                this.handleTemplateInput({ target: { value: template.content } });
+            }
+        },
+
+        async handleCSVUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const csvPreview = document.getElementById('csvPreview');
+
+            csvPreview.innerHTML = '<p class="loading">Parsing CSV file...</p>';
+
+            try {
+                this.csvData = await Campaign.parseCSV(file);
+                const { headers, rows, warnings } = this.csvData;
+
+                if (rows.length === 0) {
+                    csvPreview.innerHTML = '<p class="error">No data rows found in CSV</p>';
+                    return;
+                }
+
+                const emailCol = headers.find(h => h.toLowerCase().includes('email')) || headers[0];
+                const nameCol = headers.find(h => h.toLowerCase().includes('name')) || headers[1] || headers[0];
+
+                let previewHtml = `<p><strong>${rows.length}</strong> recipients found</p>`;
+
+                if (warnings && warnings.length > 0) {
+                    previewHtml += `<div class="csv-warnings">
                     <p class="warning-title">⚠️ Warnings (${warnings.length}):</p>
                     <ul>${warnings.slice(0, 5).map(w => `<li>${w}</li>`).join('')}</ul>
                     ${warnings.length > 5 ? `<p class="warning-more">...and ${warnings.length - 5} more warnings</p>` : ''}
@@ -783,7 +848,7 @@ const Dashboard = {
         });
     },
 
-    saveTemplate(e) {
+    async saveTemplate(e) {
         e.preventDefault();
         const name = document.getElementById('templateName').value.trim();
         const content = document.getElementById('templateContent').value.trim();
@@ -792,11 +857,19 @@ const Dashboard = {
             return;
         }
         
+        const defaultCount = typeof EmailTemplates !== 'undefined' ? EmailTemplates.length : 0;
+        
         if (this.editingTemplateIndex !== null) {
+            const template = this.templates[this.editingTemplateIndex];
+            if (this.editingTemplateIndex >= defaultCount && template.id) {
+                try {
+                    await API.updateCustomTemplate(template.id, { name, content });
+                } catch (e) {}
+            }
             this.templates[this.editingTemplateIndex] = { 
+                ...template,
                 name, 
                 content, 
-                createdAt: this.templates[this.editingTemplateIndex].createdAt,
                 updatedAt: new Date().toISOString()
             };
             this.editingTemplateIndex = null;
@@ -805,11 +878,16 @@ const Dashboard = {
             document.getElementById('saveTemplateBtn').textContent = 'Save Template';
             UI.showSuccess('Template updated!');
         } else {
-            this.templates.push({ name, content, createdAt: new Date().toISOString() });
+            try {
+                const response = await API.saveCustomTemplate({ name, content });
+                const newTemplate = response.template || { name, content, createdAt: new Date().toISOString() };
+                this.templates.push(newTemplate);
+            } catch (e) {
+                this.templates.push({ name, content, createdAt: new Date().toISOString() });
+            }
             UI.showSuccess('Template saved!');
         }
         
-        this.saveToStorage();
         this.renderTemplateList();
         this.populateTemplateSelect();
         document.getElementById('templateName').value = '';
@@ -857,34 +935,54 @@ const Dashboard = {
     renderTemplateList() {
         const container = document.getElementById('templateList');
         const countBadge = document.getElementById('templateCount');
-        if (!container) return;
+        if (!container) {
+            console.error('templateList container not found');
+            return;
+        }
+        
+        // Ensure we have valid templates array
+        if (!Array.isArray(this.templates)) {
+            console.error('this.templates is not an array:', typeof this.templates);
+            this.templates = [];
+        }
         
         if (countBadge) countBadge.textContent = this.templates.length;
         
         if (this.templates.length === 0) {
             container.innerHTML = '<p class="empty-state">No templates saved yet.</p>';
+            console.warn('renderTemplateList: No templates to render. this.templates.length =', this.templates.length);
             return;
         }
         
-        container.innerHTML = this.templates.map((t, i) => {
-            const previewHtml = t.content.substring(0, 2000);
+        // Filter out invalid templates
+        const validTemplates = this.templates.filter(t => t && t.name && t.content);
+        if (validTemplates.length !== this.templates.length) {
+            console.warn(`Filtered out ${this.templates.length - validTemplates.length} invalid templates`);
+        }
+        
+        container.innerHTML = validTemplates.map((t, i) => {
+            const originalIndex = this.templates.indexOf(t);
+            const previewHtml = (t.content || '').substring(0, 2000);
+            const createdAt = t.createdAt ? new Date(t.createdAt).toLocaleDateString() : 'Unknown date';
             return `
             <div class="template-card">
                 <div class="template-card-preview">
                     <iframe srcdoc="${this.escapeHtml(previewHtml)}" sandbox></iframe>
                 </div>
                 <div class="template-card-body">
-                    <div class="template-card-name">${this.escapeHtml(t.name)}</div>
-                    <div class="template-card-date">${new Date(t.createdAt).toLocaleDateString()}</div>
+                    <div class="template-card-name">${this.escapeHtml(t.name || 'Unnamed Template')}</div>
+                    <div class="template-card-date">${createdAt}</div>
                     <div class="template-card-actions">
-                        <button class="btn btn-secondary btn-small" onclick="Dashboard.previewTemplate(${i})">Preview</button>
-                        <button class="btn btn-primary btn-small" onclick="Dashboard.editTemplate(${i})">Edit</button>
-                        <button class="btn btn-small" onclick="Dashboard.useTemplate(${i})">Use</button>
-                        <button class="btn btn-danger btn-small" onclick="Dashboard.deleteTemplate(${i})">×</button>
+                        <button class="btn btn-secondary btn-small" onclick="Dashboard.previewTemplate(${originalIndex})">Preview</button>
+                        <button class="btn btn-primary btn-small" onclick="Dashboard.editTemplate(${originalIndex})">Edit</button>
+                        <button class="btn btn-small" onclick="Dashboard.useTemplate(${originalIndex})">Use</button>
+                        <button class="btn btn-danger btn-small" onclick="Dashboard.deleteTemplate(${originalIndex})">×</button>
                     </div>
                 </div>
             </div>
         `}).join('');
+        
+        console.log(`Rendered ${validTemplates.length} templates`);
     },
 
     escapeHtml(str) {
@@ -902,9 +1000,15 @@ const Dashboard = {
         }
     },
 
-    deleteTemplate(idx) {
+    async deleteTemplate(idx) {
+        const defaultCount = typeof EmailTemplates !== 'undefined' ? EmailTemplates.length : 0;
+        const template = this.templates[idx];
+        if (idx >= defaultCount && template && template.id) {
+            try {
+                await API.deleteCustomTemplate(template.id);
+            } catch (e) {}
+        }
         this.templates.splice(idx, 1);
-        this.saveToStorage();
         this.renderTemplateList();
         this.populateTemplateSelect();
     },
@@ -956,9 +1060,14 @@ const Dashboard = {
         if (dateFilter) dateFilter.addEventListener('change', () => this.renderLogs());
     },
 
-    renderLogs() {
+    async renderLogs() {
         const container = document.getElementById('logsList');
         if (!container) return;
+
+        try {
+            const response = await API.getLogs();
+            this.logs = (response.logs || []).reverse();
+        } catch (e) {}
 
         const typeFilter = document.getElementById('logTypeFilter')?.value || 'all';
         const dateFilter = document.getElementById('logDateFilter')?.value || '';
@@ -993,10 +1102,12 @@ const Dashboard = {
         }).join('');
     },
 
-    clearLogs() {
+    async clearLogs() {
         if (confirm('Are you sure you want to clear all logs?')) {
+            try {
+                await API.clearLogs();
+            } catch (e) {}
             this.logs = [];
-            this.saveToStorage();
             this.renderLogs();
             UI.showSuccess('Logs cleared');
         }
@@ -1085,6 +1196,13 @@ const Dashboard = {
         });
     }
 };
+
+// Verify EmailTemplates is available when script loads
+if (typeof EmailTemplates === 'undefined') {
+    console.error('CRITICAL: EmailTemplates is not defined! Check that email-templates.js is loaded before dashboard.js');
+} else {
+    console.log(`EmailTemplates loaded: ${EmailTemplates.length} templates available`);
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     Dashboard.init();

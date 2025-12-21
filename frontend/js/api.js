@@ -46,6 +46,34 @@ const API = {
         return this._request('GET', `/delivery-report/${id}`);
     },
 
+    async getCustomTemplates() {
+        return this._request('GET', '/templates');
+    },
+
+    async saveCustomTemplate(template) {
+        return this._request('POST', '/templates', template);
+    },
+
+    async updateCustomTemplate(id, template) {
+        return this._request('PUT', `/templates/${id}`, template);
+    },
+
+    async deleteCustomTemplate(id) {
+        return this._request('DELETE', `/templates/${id}`);
+    },
+
+    async getLogs() {
+        return this._request('GET', '/templates/logs');
+    },
+
+    async addLog(log) {
+        return this._request('POST', '/templates/logs', log);
+    },
+
+    async clearLogs() {
+        return this._request('DELETE', '/templates/logs');
+    },
+
     downloadReportCSV(id) {
         const session = Auth.getSession();
         const url = `${this.BASE_URL}/delivery-report/${id}/csv`;

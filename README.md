@@ -1,80 +1,125 @@
-# 📧 Mass Mailer
+<div align="center">
 
-> Bulk email campaigns made simple. Upload CSV, pick a template, hit send.
+# Mass Mailer
 
-![Python](https://img.shields.io/badge/Python-3.8+-blue?logo=python)
-![Flask](https://img.shields.io/badge/Flask-3.0-green?logo=flask)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+### Bulk Email Campaigns Made Simple
 
-** TILL 12 JAN THERE ARE MAILING CREDENTIALS in cred.txt TO TEST IT OUT**
+*Upload CSV → Pick Template → Hit Send → Track Results*
 
-## 🎯 Problem Statement
+[![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![Flask](https://img.shields.io/badge/Flask-3.0-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-Sending personalized emails at scale is painful. Existing tools are either too expensive, too complex, or lack proper validation and tracking. Small businesses and developers need a simple, self-hosted solution.
+<img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" alt="line" width="100%">
 
-## 💡 Our Solution
+</div>
 
-Mass Mailer is a full-stack email campaign platform that lets you:
-- **Upload** a CSV of recipientsany CSV column
-- **Send** in batches with rate limis or ilcre, and stom HTML
-- **Track** delivery status me}real-time
+## The Problem
 
-## ✨ res
+Sending personalized emails at scale is **painful**:
+- Enterprise tools cost a fortune
+- Open-source alternatives are overly complex  
+- No proper validation = bounced emails = ruined reputation
+- Tracking delivery? Good luck.
 
-| Feature | Description |
-|----emplate S----------|
-| 📋 CSV Import | Drag & drop recipient lists with auto-valiking f |
-| 🎨 Template Engine | Variable substitution with live preview |
-| ✅ Email Validacking**: Rmat check + MX record verification |
-| 📊 Real-time Tracking | Watch your campaign progress live |
-| 🛡️ Reputation Management | Bounce tracking & suppression lists |
-| 🔐 Secure Auth | Token-based admin authentication |
-| ⚡ Rate Limiting | Configurable batch sizes and delays |
+## Our Solution
 
-## 🛠️ Tech Stack
+A **self-hosted**, **full-stack** email campaign platform that just works.
 
-**Backend:** Python, Flask, Click CLI, dnspython  
-**Frontend:** Vanilla JS, HTML5, CSS3  
-**Testing:** pytest, Vitest, Hypothesis (property-based)
+<div align="center">
 
-## 🚀 Quick Start
+```
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│   Upload CSV  →  Pick Template  →  Send  →  Track           │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+</div>
+
+## Features
+
+<table>
+<tr>
+<td width="50%">
+
+### Smart CSV Import
+- Drag & drop recipient lists
+- Auto-validates email format
+- MX record verification
+- Handles thousands of emails
+
+</td>
+<td width="50%">
+
+### Template Engine
+- Pre-built professional templates
+- Custom HTML support
+- Variable substitution: `{{name}}`, `{{email}}`
+- Live preview before sending
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### Real-time Tracking
+- Watch campaign progress live
+- Detailed delivery reports
+- Export results to CSV
+- Per-recipient status
+
+</td>
+<td width="50%">
+
+### Reputation Management
+- Bounce tracking
+- Automatic suppression lists
+- Rate limiting built-in
+- Configurable batch delays
+
+</td>
+</tr>
+</table>
+
+## Tech Stack
+
+<div align="center">
+
+| Layer | Technologies |
+|:-----:|:-------------|
+| **Backend** | ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white) ![Flask](https://img.shields.io/badge/Flask-000000?style=flat-square&logo=flask&logoColor=white) |
+| **Frontend** | ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black) ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white) |
+| **Testing** | ![pytest](https://img.shields.io/badge/pytest-0A9EDC?style=flat-square&logo=pytest&logoColor=white) ![Vitest](https://img.shields.io/badge/Vitest-6E9F18?style=flat-square&logo=vitest&logoColor=white) |
+
+</div>
+
+## Quick Start
 
 ```bash
-# Clone & setup
-git clone <repo-url>
-cd mass-mailer
+# 1. Clone
+git clone <repo-url> && cd mass-mailer
 
-# Backend
+# 2. Install
 cd backend && pip install -r requirements.txt && cd ..
 
-# Configure
+# 3. Configure
 cp .env.example .env
 # Edit .env with your SMTP credentials
 
-# Run
-python cli.py server
+# 4. Launch
+cd backend && python app.py
 ```
 
-Open `http://localhost:5000` → Login with your admin token → Start sending!
+<div align="center">
 
-## 📁 Project Structure
+**Open** `http://localhost:5000` **→ Login → Start Sending!**
 
-```
-mass-mailt Structure
-ckend/           # k API + services
-```app/
-│   │   ├── routes/    # API endpoints
-│   │   └── services/  # SMTP, validation, templates
-│   └── tests/
-├── frontend/          # Web dashboard
-│   ├── dashboard.html
-│   └── js/
-├── config/            # YAML configs
-├── cli.py             # CLI tools
-└── test-data/         # Sample CSVs
-```
+</div>
 
-## 🔧 Configuration
+## Configuration
 
 ```env
 # .env
@@ -85,68 +130,90 @@ SMTP_PASSWORD=your-app-password
 ADMIN_ACCESS_TOKEN=your-secret-token
 ```
 
-## 📡 API Highlights
+## Architecture
+
+```
+                              ┌─────────────────┐
+                              │  ─────Browser   │
+                              │   (Dashboard)   │
+                              └────────┬────────┘
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────┐
+│           at           Flask REST API                         │
+│  ┌─ (MX ────┐  ┌──────────┐  ┌──────────┐  ┌─────────  │──┐  │
+│  │   Auth   │  │ Campaign │  │ Validate │  │   Reports    │  │
+│  │  Routes  │  │  Routes  │  │  Routes  │  │    Routes    │  │
+│  └──────────      ────────┘  └──────────┘  └──────────────┘  │
+└──────────────────────────────────────────────────────────────┘
+                                       │
+           ┌───────────────────────────┼───────────────────────────┐
+           ▼                           ▼                           ▼
+   ┌───────────────┐          ┌───────────────┐          ┌───────────────┐
+   │    Email      │          │   Template    │          │  Reputation   │
+   │   Validator   │          │    Engine     │          │   Manager     │
+   │  (MX + Format)│          │  (Variables)  │          │  (Bounces)    │
+   └───────────────┘          └───────────────┘          └───────────────┘
+                                       │
+                                       ▼
+                              ┌─────────────────┐
+                              │   SMTP Client   │
+                              │ (Gmail/Zoho/etc)│
+                              └─────────────────┘
+```
+
+## Project Structure
+
+```
+mass-mailer/
+├── backend/
+│   ├── app/
+│   │   ├── routes/        # API endpoints
+│   │   └── services/      # SMTP, validation, templates
+│   └── tests/             # pytest suite
+├── frontend/
+│   ├── dashboard.html     # Main UI
+│   ├── login.html         # Auth page
+│   └── js/                # Frontend logic
+├── config/                # YAML configurations
+└── test-data/             # Sample CSVs
+```
+
+## API Reference
 
 | Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/validate-emails` | POST | Validate email list |
-| `/api/send-campaign` | POST | Launch campaign |
-| `/api/campaign-status/:id` | GET | Track progress |
-| `/api/delivery-report/:id` | GET | Get detailed report |
+|:---------|:------:|:------------|
+| `/api/health` | `GET` | Health check |
+| `/api/validate-emails` | `POST` | Validate email list |
+| `/api/configure-smtp` | `POST` | Update SMTP settings |
+| `/api/send-campaign` | `POST` | Launch campaign |
+| `/api/campaign-status/:id` | `GET` | Track progress |
+| `/api/delivery-report/:id` | `GET` | Get detailed report |
 
-## 🎮 CLI Commands
-
-```bash
-python cli.py test-smtp          # Test SMTP connection
-python cli.py send --to x@y.com  # Send single email
-python cli.py campaign --recipients data.csv  # Bulk send
-python cli.py validate email@test.com  # Validate emails
-```
-
-## 📸 Demo
-
-1. **Login** → Enter admin token
-2. **Create Campaign** → Name it, set subject
-3. **Pick Template** → Choose or customize
-4. **Upload CSV** → Drag & drop recipients
-5. **Launch** → Watch real-time progress
-6. **Report** → Download delivery results
-
-## 🏗️ Architecture
-
-```
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│   Frontend   │────▶│  Flask API   │────▶│ SMTP Server  │
-│  Dashboard   │     │   + Auth     │     │  (Gmail/etc) │
-└──────────────┘     └──────────────┘     └──────────────┘
-                            │
-              ┌─────────────┼─────────────┐
-              ▼             ▼             ▼
-        ┌──────────┐ ┌──────────┐ ┌──────────────┐
-        │ Validator│ │ Template │ │  Reputation  │
-        │  (MX)    │ │  Engine  │ │   Manager    │
-        └──────────┘ └──────────┘ └──────────────┘
-```
-
-## 🧪 Testing
-
-```bash
-cd backend && pytest           # Backend tests
-cd frontend && npm test        # Frontend tests
-```
-
-## 🔮 Future Scope
+## Roadmap
 
 - [ ] Scheduled campaigns
 - [ ] A/B testing for templates
-- [ ] Analytics dashboard with open/click tracking
+- [ ] Open/click tracking analytics
 - [ ] Webhook integrations
-- [ ] Multi-user support with roles
+- [ ] Multi-user with role-based access
 
-## 👥 Team
+## Testing
 
-Built with ☕ and 💻 during the hackathon.
+```bash
+# Backend
+cd backend && pytest
 
-## 📄 License
+# Frontend
+cd frontend && npm test
+```
 
-MIT
+---
+
+<div align="center">
+
+### Built at the Hackathon
+
+**Star this repo if you found it useful!**
+
+</div>

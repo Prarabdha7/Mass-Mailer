@@ -874,7 +874,12 @@ const Dashboard = {
             const sel = document.getElementById(id);
             if (!sel) return;
             sel.innerHTML = '<option value="">-- Choose template --</option>';
-            this.templates.forEach((t, i) => { const o = document.createElement('option'); o.value = i; o.textContent = t.name; sel.appendChild(o); });
+            this.templates.forEach((t, i) => {
+                const o = document.createElement('option');
+                o.value = i;
+                o.textContent = t.description ? `${t.name} - ${t.description}` : t.name;
+                sel.appendChild(o);
+            });
         });
     },
 

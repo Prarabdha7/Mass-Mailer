@@ -1,6 +1,7 @@
 var EmailTemplates = [
     {
         name: 'Welcome - Stunning Gradient',
+        description: 'Colorful gradient welcome email with step-by-step onboarding guide',
         content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -70,6 +71,7 @@ var EmailTemplates = [
     },
     {
         name: 'Stripe Style - Receipt',
+        description: 'Clean payment receipt with itemized breakdown and support info',
         content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -108,6 +110,7 @@ var EmailTemplates = [
     },
     {
         name: 'Linear Style - Update',
+        description: 'Dark themed product update with feature highlights',
         content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -150,6 +153,7 @@ var EmailTemplates = [
 
 EmailTemplates.push({
     name: 'Apple Style - Minimal',
+    description: 'Clean white design with rounded CTA button',
     content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -184,6 +188,7 @@ EmailTemplates.push({
 
 EmailTemplates.push({
     name: 'Notion Style - Invite',
+    description: 'Simple workspace invite with page preview',
     content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -224,6 +229,7 @@ EmailTemplates.push({
 
 EmailTemplates.push({
     name: 'Vercel Style - Deploy',
+    description: 'Dark deployment notification with build details',
     content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -270,6 +276,7 @@ EmailTemplates.push({
 
 EmailTemplates.push({
     name: 'Figma Style - Comment',
+    description: 'Colorful comment notification with reply button',
     content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -309,6 +316,7 @@ EmailTemplates.push({
 
 EmailTemplates.push({
     name: 'Superhuman Style - Digest',
+    description: 'Purple-themed email digest summary',
     content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -409,6 +417,7 @@ EmailTemplates.push({
 
 EmailTemplates.push({
     name: 'Slack Style - Notification',
+    description: 'Workspace message notification with reply button',
     content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -457,6 +466,7 @@ EmailTemplates.push({
 
 EmailTemplates.push({
     name: 'Gradient Hero - Marketing',
+    description: 'Bold gradient marketing with 3-column features',
     content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -504,6 +514,7 @@ EmailTemplates.push({
 
 EmailTemplates.push({
     name: 'Minimal Sale - E-commerce',
+    description: 'Clean sale announcement with promo code',
     content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>

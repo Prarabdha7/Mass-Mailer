@@ -27,17 +27,20 @@ Sending personalized emails at scale is **painful**:
 
 A **self-hosted**, **full-stack** email campaign platform that just works.
 
-<div align="center">
+## How It Works
 
+```mermaid
+flowchart LR
+    A[Upload CSV] --> B[Validate Emails]
+    B --> C{All Valid?}
+    C -->|Yes| D[Select Template]
+    C -->|No| E[Review Invalid]
+    E --> A
+    D --> F[Personalize Variables]
+    F --> G[Launch Campaign]
+    G --> H[Track Progress]
+    H --> I[Download Report]
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                                                             │
-│   Upload CSV  →  Pick Template  →  Send  →  Track           │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
-
-</div>
 
 ## Features
 
@@ -132,34 +135,66 @@ ADMIN_ACCESS_TOKEN=your-secret-token
 
 ## Architecture
 
+```mermaid
+flowchart TB
+    subgraph Frontend
+        A[Web Dashboard]
+    end
+    
+    subgraph Backend["Flask REST API"]
+        B[Auth Routes]
+        C[Campaign Routes]
+        D[Validate Routes]
+        E[Report Routes]
+    end
+    
+    subgraph Services
+        F[Email Validator]
+        G[Template Engine]
+        H[Reputation Manager]
+        I[SMTP Client]
+    end
+    
+    subgraph External
+        J[(SMTP Server)]
+    end
+    
+    A --> B & C & D & E
+    C --> F & G & H
+    D --> F
+    E --> H
+    G --> I
+    I --> J
 ```
-                              ┌─────────────────┐
-                              │  ─────Browser   │
-                              │   (Dashboard)   │
-                              └────────┬────────┘
-                                       │
-                                       ▼
-┌──────────────────────────────────────────────────────────────┐
-│           at           Flask REST API                         │
-│  ┌─ (MX ────┐  ┌──────────┐  ┌──────────┐  ┌─────────  │──┐  │
-│  │   Auth   │  │ Campaign │  │ Validate │  │   Reports    │  │
-│  │  Routes  │  │  Routes  │  │  Routes  │  │    Routes    │  │
-│  └──────────      ────────┘  └──────────┘  └──────────────┘  │
-└──────────────────────────────────────────────────────────────┘
-                                       │
-           ┌───────────────────────────┼───────────────────────────┐
-           ▼                           ▼                           ▼
-   ┌───────────────┐          ┌───────────────┐          ┌───────────────┐
-   │    Email      │          │   Template    │          │  Reputation   │
-   │   Validator   │          │    Engine     │          │   Manager     │
-   │  (MX + Format)│          │  (Variables)  │          │  (Bounces)    │
-   └───────────────┘          └───────────────┘          └───────────────┘
-                                       │
-                                       ▼
-                              ┌─────────────────┐
-                              │   SMTP Client   │
-                              │ (Gmail/Zoho/etc)│
-                              └─────────────────┘
+
+## Email Sending Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant D as Dashboard
+    participant API as Flask API
+    participant V as Validator
+    participant T as Template Engine
+    participant S as SMTP Client
+    participant M as Mail Server
+
+    U->>D: Upload CSV + Select Template
+    D->>API: POST /api/send-campaign
+    API->>V: Validate emails
+    V-->>API: Validation results
+    
+    loop For each batch
+        API->>T: Render template with variables
+        T-->>API: Personalized HTML
+        API->>S: Send batch
+        S->>M: SMTP delivery
+        M-->>S: Delivery status
+        S-->>API: Batch results
+    end
+    
+    API-->>D: Campaign complete
+    D-->>U: Show delivery report
 ```
 
 ## Project Structure

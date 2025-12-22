@@ -10,7 +10,7 @@ body {
 
 .bg {
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #1a1812, #14120B), #14120B;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -18,12 +18,13 @@ body {
 }
 
 .onboard-card {
-    background: #ffffff;
+    background: #1a1812;
     width: 100%;
     max-width: 560px;
     border-radius: 18px;
     padding: 32px;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    border: 1px solid #2a2520;
     animation: fadeIn 0.6s ease;
 }
 
@@ -34,12 +35,12 @@ body {
 
 .header h1 {
     font-size: 34px;
-    color: #1f2937;
+    color: #d4a574;
 }
 
 .header p {
     margin-top: 6px;
-    color: #6b7280;
+    color: #999;
     font-size: 15px;
 }
 
@@ -79,40 +80,48 @@ body {
 .step h3 {
     font-size: 15px;
     margin-bottom: 2px;
-    color: #111827;
+    color: #e8e6e0;
 }
 
 .step p {
     font-size: 13px;
-    color: #374151;
+    color: #999;
 }
 
 .blue {
-    background: #e0ecff;
+    background: rgba(124, 151, 201, 0.15);
+    border: 1px solid rgba(124, 151, 201, 0.3);
 }
+
 .blue span {
-    background: #3b82f6;
+    background: #7c97c9;
 }
 
 .green {
-    background: #e7f8f1;
+    background: rgba(124, 185, 124, 0.15);
+    border: 1px solid rgba(124, 185, 124, 0.3);
 }
+
 .green span {
-    background: #10b981;
+    background: #7cb97c;
 }
 
 .orange {
-    background: #fff3e0;
+    background: rgba(212, 165, 116, 0.15);
+    border: 1px solid rgba(212, 165, 116, 0.3);
 }
+
 .orange span {
-    background: #f59e0b;
+    background: #d4a574;
 }
 
 .purple {
-    background: #f1eafe;
+    background: rgba(201, 124, 124, 0.15);
+    border: 1px solid rgba(201, 124, 124, 0.3);
 }
+
 .purple span {
-    background: #8b5cf6;
+    background: #c97c7c;
 }
 
 .cta {
@@ -122,15 +131,16 @@ body {
     font-weight: 600;
     border: none;
     border-radius: 12px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
+    background: linear-gradient(135deg, #d4a574, #c49464);
+    color: #14120B;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .cta:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 12px 30px rgba(212, 165, 116, 0.4);
+    background: linear-gradient(135deg, #c49464, #b8945c);
 }
 
 @keyframes fadeIn {
@@ -148,7 +158,6 @@ body {
     .onboard-card {
         padding: 26px;
     }
-
     .header h1 {
         font-size: 28px;
     }

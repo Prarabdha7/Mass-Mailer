@@ -48,3 +48,5 @@ yarn-error.log*
 *~
 
 config/app.yaml
+
+data/

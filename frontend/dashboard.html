@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mass Mailer Dashboard</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    <span>Mass Mailer</span>
+                </div>
+                <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12h18M3 6h18M3 18h18"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-tab="campaigns" title="Campaigns">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    <span>Campaigns</span>
+                </button>
+                <button class="nav-item" data-tab="templates" title="Templates">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    <span>Templates</span>
+                </button>
+                <button class="nav-item" data-tab="logs" title="Logs">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span>Logs</span>
+                </button>
+                <button class="nav-item" data-tab="settings" title="Settings">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                        </path>
+                    </svg>
+                    <span>Settings</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="nav-item" id="logoutBtn" title="Logout">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <!-- Unified Campaigns Section -->
+            <section id="campaigns" class="tab-content active">
+                <!-- Main View: Campaign List -->
+                <div id="campaignListView">
+                    <div class="page-header">
+                        <h1>Campaigns</h1>
+                        <div class="page-actions">
+                            <button id="createCampaignBtn" class="btn btn-primary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                Create New Campaign
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <h2>Your Campaigns <span id="campaignCount" class="badge">0</span></h2>
+                        <div id="campaignGrid" class="campaign-grid">
+                            <p class="empty-state">No campaigns yet. Click "Create New Campaign" to get started!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Campaign Editor View (for editing existing campaigns) -->
+                <div id="campaignEditorView" style="display: none;">
+                    <div class="page-header">
+                        <button id="backToListBtn" class="btn btn-secondary">← Back to Campaigns</button>
+                        <h1 id="editorCampaignTitle">Edit Campaign</h1>
+                    </div>
+
+                    <div class="panel">
+                        <form id="campaignEditorForm" class="campaign-form">
+                            <input type="hidden" id="editCampaignId">
+                            <div class="form-row">
+                                <div class="form-group" style="flex:1;">
+                                    <label for="editCampaignName">Campaign Name</label>
+                                    <input type="text" id="editCampaignName" required
+                                        placeholder="e.g., March Newsletter">
+                                </div>
+                                <div class="form-group" style="flex:1;">
+                                    <label for="editSubject">Email Subject</label>
+                                    <input type="text" id="editSubject" required placeholder="e.g., Your Weekly Update">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="editTemplateSelect">Template</label>
+                                <select id="editTemplateSelect">
+                                    <option value="">-- Select a template --</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="editTemplate">Email Template (HTML)</label>
+                                <textarea id="editTemplate" rows="12"
+                                    placeholder="Use {{name}}, {{email}} or any CSV column as placeholders"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="editCsvFile">Recipients CSV</label>
+                                <input type="file" id="editCsvFile" accept=".csv">
+                                <small>CSV must have 'email' column. Optional: 'name' and other columns.</small>
+                                <div id="editCsvPreview" class="csv-preview"></div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="editBatchSize">Batch Size</label>
+                                    <input type="number" id="editBatchSize" value="10" min="1" max="100">
+                                </div>
+                                <div class="form-group">
+                                    <label for="editDelaySeconds">Delay (seconds)</label>
+                                    <input type="number" id="editDelaySeconds" value="2" min="0" step="0.5">
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" id="editorTestEmailBtn" class="btn btn-secondary">Send Test
+                                    Email</button>
+                                <button type="button" id="saveDraftBtn" class="btn btn-secondary">Save Draft</button>
+                                <button type="submit" class="btn btn-primary">Validate & Launch</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Validation Panel -->
+                    <div id="validationPanel" class="panel validation-panel" style="display: none;">
+                        <h2>Email Validation Results</h2>
+                        <div class="validation-summary">
+                            <span class="valid-count">Valid: <strong id="validCount">0</strong></span>
+                            <span class="invalid-count">Invalid: <strong id="invalidCount">0</strong></span>
+                        </div>
+                        <div id="validationResults" class="validation-results"></div>
+                        <div class="validation-actions">
+                            <button id="proceedBtn" class="btn btn-primary">Send to Valid Emails</button>
+                            <button id="cancelValidationBtn" class="btn btn-secondary">Cancel</button>
+                        </div>
+                    </div>
+
+                    <!-- Progress Panel -->
+                    <div id="progressPanel" class="panel progress-panel" style="display: none;">
+                        <h2>Sending Progress</h2>
+                        <div class="progress-bar-container">
+                            <div id="progressBar" class="progress-bar"></div>
+                        </div>
+                        <div class="progress-stats">
+                            <span>Sent: <strong id="sentCount">0</strong></span>
+                            <span>Failed: <strong id="failedCount">0</strong></span>
+                            <span>Pending: <strong id="pendingCount">0</strong></span>
+                        </div>
+                        <div id="progressStatus" class="progress-status"></div>
+                    </div>
+
+                    <!-- Report Panel -->
+                    <div id="reportPanel" class="panel" style="display: none;">
+                        <div class="report-header">
+                            <h2>Delivery Report: <span id="reportCampaignName"></span></h2>
+                            <button class="btn btn-secondary btn-small" onclick="Dashboard.showCampaignList()">← Back to
+                                Campaigns</button>
+                        </div>
+
+                        <div class="report-campaign-details">
+                            <h3>Campaign Configuration</h3>
+                            <div class="details-grid">
+                                <div class="detail-item">
+                                    <span class="label">Subject:</span>
+                                    <span class="value" id="reportSubject">-</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Template:</span>
+                                    <span class="value" id="reportTemplateName">-</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Batch Size:</span>
+                                    <span class="value" id="reportBatchSize">-</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Delay:</span>
+                                    <span class="value" id="reportDelay">-</span> seconds
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Created:</span>
+                                    <span class="value" id="reportDate">-</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Status:</span>
+                                    <span class="value" id="reportStatus">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="report-filters">
+                            <label>Filter:</label>
+                            <select id="statusFilter">
+                                <option value="all">All</option>
+                                <option value="sent">Sent</option>
+                                <option value="failed">Failed</option>
+                            </select>
+                            <button id="downloadCsvBtn" class="btn btn-secondary">Download CSV</button>
+                        </div>
+                        <div class="report-summary">
+                            <span>Total: <strong id="totalRecords">0</strong></span>
+                            <span>Sent: <strong id="sentRecords">0</strong></span>
+                            <span>Failed: <strong id="failedRecords">0</strong></span>
+                        </div>
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Name</th>
+                                    <th>Status</th>
+                                    <th>Reason</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Campaign Creation Wizard Modal -->
+            <div id="campaignWizardModal" class="modal" style="display: none;">
+                <div class="modal-content modal-wizard">
+                    <div class="wizard-header">
+                        <h2>Create New Campaign</h2>
+                        <button id="closeWizardBtn" class="btn-close">&times;</button>
+                    </div>
+
+                    <div class="wizard-progress">
+                        <div class="wizard-step active" data-step="1"><span>1</span> Name</div>
+                        <div class="wizard-step" data-step="2"><span>2</span> Subject</div>
+                        <div class="wizard-step" data-step="3"><span>3</span> Template</div>
+                        <div class="wizard-step" data-step="4"><span>4</span> Customize</div>
+                        <div class="wizard-step" data-step="5"><span>5</span> Recipients</div>
+                        <div class="wizard-step" data-step="6"><span>6</span> Review</div>
+                        <div class="wizard-step" data-step="7"><span>7</span> Sending</div>
+                    </div>
+
+                    <div class="wizard-body">
+                        <!-- Step 1: Campaign Name -->
+                        <div class="wizard-panel active" data-step="1">
+                            <h3>What would you like to call this campaign?</h3>
+                            <div class="form-group">
+                                <input type="text" id="wizardCampaignName" class="wizard-input"
+                                    placeholder="e.g., March Newsletter" autofocus>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Subject -->
+                        <div class="wizard-panel" data-step="2">
+                            <h3>What's the email subject line?</h3>
+                            <div class="form-group">
+                                <input type="text" id="wizardSubject" class="wizard-input"
+                                    placeholder="e.g., Your Weekly Update">
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Template Selection -->
+                        <div class="wizard-panel" data-step="3">
+                            <h3>Choose a template style</h3>
+                            <div class="template-options">
+                                <button type="button" class="template-option active" data-option="default">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="1.5">
+                                        <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                                        <line x1="3" y1="9" x2="21" y2="9"></line>
+                                        <line x1="9" y1="21" x2="9" y2="9"></line>
+                                    </svg>
+                                    <span>Default Templates</span>
+                                    <small>Choose from pre-designed templates</small>
+                                </button>
+                                <button type="button" class="template-option" data-option="custom">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="1.5">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                    <span>Write Your Own</span>
+                                    <small>Create custom HTML template</small>
+                                </button>
+                            </div>
+                            <div id="templateSelectArea" class="template-select-area">
+                                <label>Select a template:</label>
+                                <select id="wizardTemplateSelect" class="wizard-select">
+                                    <option value="">-- Choose template --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Template Customization -->
+                        <div class="wizard-panel" data-step="4">
+                            <div class="wizard-editor-toolbar">
+                                <h3 style="margin:0">Customize your template</h3>
+                                <div class="toolbar-left">
+                                    <button type="button" id="wizardVisualEditBtn" class="btn-toggle">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                        </svg>
+                                        Edit Text
+                                    </button>
+                                    <button type="button" id="wizardThemeEditBtn" class="btn-toggle">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <path d="M12 2a10 10 0 0 1 0 20"></path>
+                                            <path d="M12 2c-2.4 2.4-4 6-4 10s1.6 7.6 4 10"></path>
+                                        </svg>
+                                        Edit Theme
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Variable Editor Panel -->
+                            <div id="wizardVariableEditor" class="variable-editor-panel" style="display: none;">
+                                <div class="variable-editor-header">
+                                    <h4>Template Variables</h4>
+                                    <small>Fill in values for placeholders (except name/email from CSV). <span
+                                            class="tip">💡 Tip: Type <code>none</code> to remove a field
+                                            entirely.</span></small>
+                                </div>
+                                <div id="wizardVariableList" class="variable-list"></div>
+                            </div>
+                            <div class="wizard-template-editor">
+                                <div class="wizard-editor-pane">
+                                    <textarea id="wizardTemplate"
+                                        placeholder="Your HTML template content..."></textarea>
+                                </div>
+                                <div class="wizard-preview-pane" id="wizardPreviewPane">
+                                    <div class="wizard-preview-header">
+                                        <span class="pane-header">Preview</span>
+                                    </div>
+                                    <iframe id="wizardTemplatePreview" sandbox="allow-same-origin"></iframe>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 5: Recipients -->
+                        <div class="wizard-panel" data-step="5">
+                            <h3>Add your recipients</h3>
+
+                            <!-- Toggle between CSV and Manual -->
+                            <div class="recipient-mode-toggle">
+                                <button type="button" class="mode-btn active" data-mode="csv">CSV Upload</button>
+                                <button type="button" class="mode-btn" data-mode="manual">Manual Entry</button>
+                            </div>
+
+                            <!-- CSV Upload Mode -->
+                            <div class="recipient-mode" id="csvUploadMode">
+                                <div class="form-group">
+                                    <div class="file-upload-area" id="wizardFileUpload">
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="1.5">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                            <polyline points="17 8 12 3 7 8"></polyline>
+                                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                                        </svg>
+                                        <p>Drag & drop your CSV file here, or <strong>click to browse</strong></p>
+                                        <small>CSV must have 'email' column. Optional: 'name' and other columns.</small>
+                                        <input type="file" id="wizardCsvFile" accept=".csv" hidden>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Manual Entry Mode -->
+                            <div class="recipient-mode" id="manualEntryMode" style="display: none;">
+                                <div class="manual-recipients-list" id="manualRecipientsList">
+                                    <div class="manual-recipient-row">
+                                        <input type="text" class="recipient-name" placeholder="Name">
+                                        <input type="email" class="recipient-email" placeholder="Email address">
+                                        <button type="button" class="btn-remove-recipient" title="Remove">×</button>
+                                    </div>
+                                </div>
+                                <button type="button" id="addRecipientBtn" class="btn btn-secondary btn-small">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                    Add Another Recipient
+                                </button>
+                            </div>
+
+                            <div id="wizardCsvPreview" class="csv-preview"></div>
+                        </div>
+
+
+                        <!-- Step 6: Review & Settings -->
+                        <div class="wizard-panel" data-step="6">
+                            <h3>Review & Launch</h3>
+                            <div class="review-summary">
+                                <div class="review-item">
+                                    <label>Campaign Name</label>
+                                    <span id="reviewCampaignName">-</span>
+                                </div>
+                                <div class="review-item">
+                                    <label>Subject</label>
+                                    <span id="reviewSubject">-</span>
+                                </div>
+                                <div class="review-item">
+                                    <label>Recipients</label>
+                                    <span id="reviewRecipients">0 recipients</span>
+                                </div>
+                                <div class="review-item">
+                                    <label>Template Variables</label>
+                                    <div id="reviewTemplateVars" class="review-vars">None set</div>
+                                </div>
+                            </div>
+                            <div class="form-row" style="margin-top: 20px;">
+                                <div class="form-group">
+                                    <label for="wizardBatchSize">Batch Size</label>
+                                    <input type="number" id="wizardBatchSize" value="10" min="1" max="100">
+                                </div>
+                                <div class="form-group">
+                                    <label for="wizardDelaySeconds">Delay (seconds)</label>
+                                    <input type="number" id="wizardDelaySeconds" value="2" min="0" step="0.5">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 7: Sending Status -->
+                        <div class="wizard-panel" data-step="7">
+                            <h3>Sending Campaign</h3>
+                            <div class="wizard-sending-status">
+                                <div class="sending-animation">
+                                    <div class="sending-spinner"></div>
+                                </div>
+                                <p id="wizardSendingMessage" class="sending-message">Preparing to send emails...</p>
+                                <div class="wizard-progress-bar">
+                                    <div id="wizardProgressFill" class="progress-fill" style="width: 0%;"></div>
+                                </div>
+                                <div class="wizard-sending-stats">
+                                    <div class="stat-item sent">
+                                        <span class="stat-value" id="wizardSentCount">0</span>
+                                        <span class="stat-label">Sent</span>
+                                    </div>
+                                    <div class="stat-item failed">
+                                        <span class="stat-value" id="wizardFailedCount">0</span>
+                                        <span class="stat-label">Failed</span>
+                                    </div>
+                                    <div class="stat-item total">
+                                        <span class="stat-value" id="wizardTotalCount">0</span>
+                                        <span class="stat-label">Total</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wizard-footer">
+                        <button type="button" id="wizardBackBtn" class="btn btn-secondary" style="display: none;">←
+                            Back</button>
+                        <div class="wizard-footer-right">
+                            <button type="button" id="wizardSaveDraftBtn" class="btn btn-secondary">Save as
+                                Draft</button>
+                            <button type="button" id="wizardNextBtn" class="btn btn-primary">Next →</button>
+                            <button type="button" id="wizardLaunchBtn" class="btn btn-primary"
+                                style="display: none;">Launch
+                                Campaign</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <section id="templates" class="tab-content">
+                <div class="page-header">
+                    <h1>Email Templates</h1>
+                    <div class="page-actions">
+                        <button id="resetTemplatesBtn" class="btn btn-secondary btn-small">Reset to Defaults</button>
+                    </div>
+                </div>
+
+                <div class="panel template-editor-panel">
+                    <div class="template-editor-header">
+                        <h2 id="editorTitle">Create New Template</h2>
+                        <div class="editor-tabs">
+                            <button class="editor-tab active" data-view="split">Split View</button>
+                            <button class="editor-tab" data-view="code">Code Only</button>
+                            <button class="editor-tab" data-view="preview">Preview Only</button>
+                            <button class="editor-tab" data-view="visual">✏️ Visual Edit</button>
+                        </div>
+                    </div>
+                    <form id="templateForm" class="template-form">
+                        <div class="form-row">
+                            <div class="form-group" style="flex:1;">
+                                <label for="templateName">Template Name</label>
+                                <input type="text" id="templateName" required placeholder="e.g., Welcome Email">
+                            </div>
+                            <div class="form-group" style="width:200px;">
+                                <label for="previewData">Preview Data</label>
+                                <button type="button" id="editPreviewDataBtn" class="btn btn-secondary btn-small"
+                                    style="width:100%;">Edit Variables</button>
+                            </div>
+                        </div>
+                        <div class="template-editor-container" id="editorContainer">
+                            <div class="editor-pane code-pane">
+                                <div class="pane-header">
+                                    <span>HTML Code</span>
+                                    <div class="pane-actions">
+                                        <button type="button" class="btn-icon" id="formatCodeBtn"
+                                            title="Format Code">⚡</button>
+                                        <button type="button" class="btn-icon" id="copyCodeBtn"
+                                            title="Copy Code">📋</button>
+                                    </div>
+                                </div>
+                                <textarea id="templateContent"
+                                    placeholder="Write your HTML email template here..."></textarea>
+                            </div>
+                            <div class="editor-pane preview-pane">
+                                <div class="pane-header">
+                                    <span>Live Preview</span>
+                                    <div class="pane-actions">
+                                        <select id="previewDevice">
+                                            <option value="desktop">Desktop</option>
+                                            <option value="tablet">Tablet</option>
+                                            <option value="mobile">Mobile</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="preview-wrapper" id="previewWrapper">
+                                    <iframe id="templatePreview" sandbox="allow-same-origin"></iframe>
+                                </div>
+                            </div>
+                            <div class="editor-pane visual-pane" style="display:none;">
+                                <div class="pane-header">
+                                    <span>✏️ Visual Text Editor</span>
+                                    <div class="pane-actions">
+                                        <span class="visual-hint">Edit text without touching code</span>
+                                    </div>
+                                </div>
+                                <div class="visual-editor-content" id="visualEditorContent">
+                                    <p class="empty-state">Load a template to edit its text content</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions" style="margin-top:20px;">
+                            <button type="button" id="cancelEditBtn" class="btn btn-secondary"
+                                style="display:none;">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="saveTemplateBtn">Save Template</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="panel">
+                    <h2>Saved Templates <span id="templateCount" class="badge">0</span></h2>
+                    <div class="template-grid" id="templateList">
+                        <p class="empty-state">No templates saved yet.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="logs" class="tab-content">
+                <div class="page-header">
+                    <h1>Activity Logs</h1>
+                    <div class="page-actions">
+                        <button id="refreshLogsBtn" class="btn btn-secondary btn-small">Refresh</button>
+                        <button id="clearLogsBtn" class="btn btn-danger btn-small">Clear Logs</button>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="logs-filters">
+                        <select id="logTypeFilter">
+                            <option value="all">All Types</option>
+                            <option value="campaign">Campaigns</option>
+                            <option value="email">Emails</option>
+                            <option value="error">Errors</option>
+                            <option value="auth">Authentication</option>
+                        </select>
+                        <input type="date" id="logDateFilter" placeholder="Filter by date">
+                    </div>
+                    <div id="logsList" class="logs-list">
+                        <p class="empty-state">No logs yet.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="settings" class="tab-content">
+                <div class="page-header">
+                    <h1>Settings</h1>
+                </div>
+                <div class="panel">
+                    <h2>Email Validation Settings</h2>
+                    <div class="form-group">
+                        <label for="whitelistDomains">Whitelisted Domains</label>
+                        <textarea id="whitelistDomains" rows="4"
+                            placeholder="Enter domains (one per line)&#10;e.g., srmist.edu.in&#10;gmail.com&#10;company.com"></textarea>
+                        <small>Emails from these domains will always be marked as valid (skip MX check)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="blacklistDomains">Blacklisted Domains</label>
+                        <textarea id="blacklistDomains" rows="4"
+                            placeholder="Enter domains to block (one per line)&#10;e.g., tempmail.com&#10;throwaway.com"></textarea>
+                        <small>Emails from these domains will always be marked as invalid</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="customValidEmails">Custom Valid Emails</label>
+                        <textarea id="customValidEmails" rows="4"
+                            placeholder="Enter specific emails to whitelist (one per line)&#10;e.g., special@custom-domain.com"></textarea>
+                        <small>These specific emails will always be marked as valid</small>
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="skipMxCheck">
+                            Skip MX record validation (faster, less strict)
+                        </label>
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="allowPlusAddressing" checked>
+                            Allow plus addressing (e.g., user+tag@gmail.com)
+                        </label>
+                    </div>
+                    <button id="saveSettingsBtn" class="btn btn-primary">Save Settings</button>
+                </div>
+                <div class="panel">
+                    <h2>Default Campaign Settings</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="defaultBatchSize">Default Batch Size</label>
+                            <input type="number" id="defaultBatchSize" value="10" min="1" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label for="defaultDelay">Default Delay (seconds)</label>
+                            <input type="number" id="defaultDelay" value="2" min="0" step="0.5">
+                        </div>
+                    </div>
+                    <button id="saveCampaignSettingsBtn" class="btn btn-primary">Save Campaign Settings</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="testEmailModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>Send Test Email</h3>
+            <div class="form-group">
+                <label for="testEmail">Send test to:</label>
+                <input type="email" id="testEmail" required placeholder="your@email.com">
+            </div>
+            <div class="modal-actions">
+                <button id="sendTestBtn" class="btn btn-primary">Send Test</button>
+                <button id="cancelTestBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="previewDataModal" class="modal" style="display: none;">
+        <div class="modal-content modal-large">
+            <h3>Edit Preview Variables</h3>
+            <p class="modal-description">Set sample values for template placeholders to see how your email will look.
+            </p>
+            <div id="previewVariablesContainer" class="preview-variables-grid"></div>
+            <div class="modal-actions">
+                <button id="applyPreviewDataBtn" class="btn btn-primary">Apply & Preview</button>
+                <button id="cancelPreviewDataBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/campaign.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/email-templates.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+
+</html>

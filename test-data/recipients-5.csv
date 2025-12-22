@@ -1,0 +1,11 @@
+name,email,location,discount_code
+Ninja S1,ninjakas1acc@gmail.com,Mumbai,NINJA20
+ICONIC OFFICIAL,iconicoffici420@gmail.com,Delhi,ICONIC15
+iNinja OP,ininja1403@gmail.com,Bangalore,STREAM25
+Acc Npc,ninjaop1403l@gmail.com,Chennai,NPC10
+DCx BSLD,ilovediscord42069@gmail.com,Hyderabad,DISCORD30
+Nikhil Solanki,nikhilsolankionexams@gmail.com,Pune,TECH50
+Test Invalid,invalid-email-format,Kolkata,INVALID
+Empty Email,,Jaipur,EMPTY
+Null Domain,user@,Lucknow,NULL
+Fake Domain,user@thisisnotarealdomain999.xyz,Ahmedabad,FAKE

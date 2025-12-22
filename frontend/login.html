@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Mass Mailer</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #14120B;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            background: #1a1812;
+            padding: 3rem 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+            border: 1px solid #2a2520;
+            width: 100%;
+            max-width: 420px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #e8e6e0;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+        
+        .header p {
+            font-size: 0.95rem;
+            color: #999;
+            font-weight: 400;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #999;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1px solid #3a3428;
+            border-radius: 8px;
+            background: #25221a;
+            color: #e8e6e0;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        
+        input::placeholder {
+            color: #666;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #d4a574;
+            box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.15);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: #25221a;
+            color: #e8e6e0;
+            border: 1px solid #3a3428;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        
+        .btn:hover {
+            background: #2f2b20;
+            border-color: #4a4234;
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .error {
+            color: #c97c7c;
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.875rem;
+            display: none;
+            padding: 0.75rem;
+            background: rgba(201, 124, 124, 0.1);
+            border: 1px solid rgba(201, 124, 124, 0.2);
+            border-radius: 6px;
+        }
+        
+        .error.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="header">
+            <h1>Welcome to Mass Mailer</h1>
+            <p>Your email campaign management platform</p>
+        </div>
+
+        <form id="tokenForm">
+            <div class="form-group">
+                <label for="accessToken">Access Token</label>
+                <input type="password" id="accessToken" name="accessToken" required placeholder="Enter your access token" autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn">Continue</button>
+        </form>
+        <div id="error" class="error"></div>
+    </div>
+    <script src="js/auth.js"></script>
+    <script src="js/login.js"></script>
+</body>
+
+</html>

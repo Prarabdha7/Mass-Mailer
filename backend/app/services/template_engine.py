@@ -15,20 +15,25 @@ def parse_placeholders(template: str) -> list[str]:
     return list(dict.fromkeys(matches))
 
 def render_template(template: str, variables: dict) -> tuple[Optional[str], Optional[TemplateError]]:
-    placeholders = parse_placeholders(template)
-    missing = [p for p in placeholders if p not in variables]
-    
-    if missing:
-        return None, TemplateError(
-            message=f"Missing template variable: {missing[0]}",
-            missing_variables=missing
-        )
-    
+    """
+    Render a template by replacing placeholders with variable values.
+    Missing variables are replaced with empty string (lenient mode).
+    Variables with value 'none' (case insensitive) are also replaced with empty string.
+    After substitution, removes any anchor tags with empty href attributes.
+    """
     def replace_placeholder(match):
         var_name = match.group(1)
-        return str(variables.get(var_name, match.group(0)))
+        value = variables.get(var_name, '')
+        value = str(value).strip()
+        if value.lower() == 'none':
+            return ''
+        return value
     
     result = PLACEHOLDER_REGEX.sub(replace_placeholder, template)
+    
+    result = re.sub(r'<a\s+[^>]*href=["\']["\'][^>]*>([^<]*)</a>', r'\1', result, flags=re.IGNORECASE)
+    result = re.sub(r'<a\s+[^>]*href=["\']["\'][^>]*>(.*?)</a>', r'\1', result, flags=re.IGNORECASE | re.DOTALL)
+    
     return result, None
 
 def validate_variables(template: str, available_vars: list[str]) -> list[str]:

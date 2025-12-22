@@ -2201,3 +2201,87 @@ body {
     align-items: center;
     gap: 0.5rem;
 }
+
+/* Variable Editor Panel */
+.variable-editor-panel {
+    background: #1f1f1f;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.variable-editor-header {
+    margin-bottom: 1rem;
+}
+
+.variable-editor-header h4 {
+    color: #d4a574;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem;
+}
+
+.variable-editor-header small {
+    color: #666;
+    font-size: 0.8rem;
+}
+
+.variable-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.variable-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.variable-item label {
+    color: #888;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.variable-item label code {
+    background: #2a3a2a;
+    color: #7cb97c;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+.variable-item input,
+.variable-item textarea {
+    padding: 0.65rem 0.85rem;
+    background: #252525;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #e0e0e0;
+    font-size: 0.9rem;
+}
+
+.variable-item input:focus,
+.variable-item textarea:focus {
+    outline: none;
+    border-color: #d4a574;
+}
+
+.variable-item textarea {
+    min-height: 60px;
+    resize: vertical;
+}
+
+.variable-item.from-csv label::after {
+    content: "CSV";
+    background: #2a2a3a;
+    color: #9999cc;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    margin-left: auto;
+}

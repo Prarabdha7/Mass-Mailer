@@ -538,7 +538,7 @@ const Dashboard = {
         }).join('');
     },
 
-    wizardData: { currentStep: 1, totalSteps: 6, campaignName: '', subject: '', templateType: 'default', templateContent: '', csvData: null, recipients: [], batchSize: 10, delaySeconds: 2 },
+    wizardData: { currentStep: 1, totalSteps: 6, campaignName: '', subject: '', templateType: 'default', templateContent: '', csvData: null, recipients: [], batchSize: 10, delaySeconds: 2, templateVariables: {} },
 
     initCampaignWizard() {
         const createBtn = document.getElementById('createCampaignBtn');
@@ -575,8 +575,20 @@ const Dashboard = {
             wizardFileUpload.addEventListener('drop', e => { e.preventDefault(); wizardFileUpload.classList.remove('drag-over'); const f = e.dataTransfer?.files[0]; if (f?.name.endsWith('.csv')) this.handleWizardCsvUpload({ target: { files: [f] } }); });
         }
         if (wizardCsvFile) wizardCsvFile.addEventListener('change', e => this.handleWizardCsvUpload(e));
-        if (wizardTemplateSelect) wizardTemplateSelect.addEventListener('change', e => { const idx = e.target.value; if (idx !== '' && this.templates[idx]) { this.wizardData.templateContent = this.templates[idx].content; document.getElementById('wizardTemplate').value = this.templates[idx].content; this.updateWizardPreview(); } });
-        document.getElementById('wizardTemplate')?.addEventListener('input', () => this.updateWizardPreview());
+        if (wizardTemplateSelect) wizardTemplateSelect.addEventListener('change', e => {
+            const idx = e.target.value;
+            if (idx !== '' && this.templates[idx]) {
+                this.wizardData.templateContent = this.templates[idx].content;
+                document.getElementById('wizardTemplate').value = this.templates[idx].content;
+                this.renderWizardVariableEditor();
+                this.updateWizardPreview();
+            }
+        });
+        document.getElementById('wizardTemplate')?.addEventListener('input', () => {
+            this.wizardData.templateContent = document.getElementById('wizardTemplate').value;
+            this.renderWizardVariableEditor();
+            this.updateWizardPreview();
+        });
 
         // Visual Edit button - opens placeholder editor
         const visualEditBtn = document.getElementById('wizardVisualEditBtn');
@@ -870,11 +882,13 @@ const Dashboard = {
         const modal = document.getElementById('campaignWizardModal');
         if (!modal) return;
         modal.style.display = 'flex';
-        this.wizardData = { currentStep: 1, totalSteps: 6, campaignName: '', subject: '', templateType: 'default', templateContent: '', csvData: null, recipients: [], batchSize: 10, delaySeconds: 2 };
+        this.wizardData = { currentStep: 1, totalSteps: 6, campaignName: '', subject: '', templateType: 'default', templateContent: '', csvData: null, recipients: [], batchSize: 10, delaySeconds: 2, templateVariables: {} };
         document.getElementById('wizardCampaignName').value = '';
         document.getElementById('wizardSubject').value = '';
         document.getElementById('wizardTemplate').value = '';
         document.getElementById('wizardCsvPreview').innerHTML = '';
+        const varEditor = document.getElementById('wizardVariableEditor');
+        if (varEditor) varEditor.style.display = 'none';
         this.updateWizardStep();
         document.getElementById('wizardCampaignName')?.focus();
     },
@@ -920,18 +934,78 @@ const Dashboard = {
         const iframe = document.getElementById('wizardTemplatePreview');
         if (!iframe) return;
 
-        // Replace placeholders with previewData values
+        // Replace placeholders with templateVariables first, then previewData as fallback
         let rendered = content;
         const placeholders = content.match(/\{\{(\w+)\}\}/g) || [];
         placeholders.forEach(p => {
             const key = p.replace(/\{\{|\}\}/g, '');
-            const value = this.previewData[key] || `{{${key}}}`;
+            // Use templateVariables (user-provided) first, then previewData (defaults), then keep placeholder
+            const value = this.wizardData.templateVariables[key] || this.previewData[key] || `{{${key}}}`;
             rendered = rendered.replace(new RegExp(p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), value);
         });
 
         const doc = iframe.contentDocument || iframe.contentWindow.document;
         doc.open(); doc.write(rendered); doc.close();
     },
+
+    renderWizardVariableEditor() {
+        const content = document.getElementById('wizardTemplate')?.value || '';
+        const editorPanel = document.getElementById('wizardVariableEditor');
+        const variableList = document.getElementById('wizardVariableList');
+        if (!editorPanel || !variableList) return;
+
+        // Extract placeholders from template
+        const placeholderMatches = content.match(/\{\{(\w+)\}\}/g) || [];
+        const placeholders = [...new Set(placeholderMatches.map(p => p.replace(/\{\{|\}\}/g, '')))];
+
+        // Filter out name and email (these come from CSV)
+        const csvVariables = ['name', 'email'];
+        const editableVars = placeholders.filter(p => !csvVariables.includes(p.toLowerCase()));
+
+        if (editableVars.length === 0) {
+            editorPanel.style.display = 'none';
+            return;
+        }
+
+        editorPanel.style.display = 'block';
+
+        // Build variable editor HTML
+        let html = '';
+        editableVars.forEach(varName => {
+            const currentValue = this.wizardData.templateVariables[varName] || this.previewData[varName] || '';
+            const isLongText = varName.includes('text') || varName.includes('description') || varName.includes('message');
+
+            html += `<div class="variable-item">
+                <label><code>{{${varName}}}</code> ${this.formatVarLabel(varName)}</label>
+                ${isLongText
+                    ? `<textarea data-var="${varName}" placeholder="Enter ${this.formatVarLabel(varName).toLowerCase()}">${this.escapeHtml(currentValue)}</textarea>`
+                    : `<input type="text" data-var="${varName}" value="${this.escapeHtml(currentValue)}" placeholder="Enter ${this.formatVarLabel(varName).toLowerCase()}">`
+                }
+            </div>`;
+        });
+
+        variableList.innerHTML = html;
+
+        // Add event listeners to save values
+        variableList.querySelectorAll('input, textarea').forEach(input => {
+            input.addEventListener('input', (e) => {
+                const varName = e.target.dataset.var;
+                this.wizardData.templateVariables[varName] = e.target.value;
+                this.updateWizardPreview();
+            });
+        });
+    },
+
+    formatVarLabel(varName) {
+        return varName
+            .replace(/_/g, ' ')
+            .replace(/([A-Z])/g, ' $1')
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ')
+            .trim();
+    },
+
 
     async handleWizardCsvUpload(e) {
         const file = e.target.files?.[0]; if (!file) return;
@@ -955,8 +1029,23 @@ const Dashboard = {
     async launchFromWizard() {
         if (!this.wizardData.campaignName || !this.wizardData.subject || !this.wizardData.templateContent || !this.wizardData.recipients.length) { UI.showError('Complete all steps'); return; }
         this.closeWizard();
-        this.pendingFormData = { name: this.wizardData.campaignName, subject: this.wizardData.subject, template: this.wizardData.templateContent, recipients: this.wizardData.recipients, batch_size: parseInt(document.getElementById('wizardBatchSize')?.value) || 10, delay_seconds: parseFloat(document.getElementById('wizardDelaySeconds')?.value) || 2 };
-        this.showEditorView(); await this.validateEmails(this.wizardData.recipients);
+
+        // Merge template variables with each recipient's variables
+        const recipientsWithVars = this.wizardData.recipients.map(r => ({
+            ...r,
+            variables: { ...this.wizardData.templateVariables, ...r.variables }
+        }));
+
+        this.pendingFormData = {
+            name: this.wizardData.campaignName,
+            subject: this.wizardData.subject,
+            template: this.wizardData.templateContent,
+            recipients: recipientsWithVars,
+            batch_size: parseInt(document.getElementById('wizardBatchSize')?.value) || 10,
+            delay_seconds: parseFloat(document.getElementById('wizardDelaySeconds')?.value) || 2
+        };
+        this.showEditorView();
+        await this.validateEmails(recipientsWithVars);
     },
 
     showCampaignList() { document.getElementById('campaignListView').style.display = 'block'; document.getElementById('campaignEditorView').style.display = 'none'; },
@@ -1025,7 +1114,7 @@ const Dashboard = {
             this.allDeliveryRecords = records;
             document.getElementById('reportPanel').style.display = 'block';
             UI.renderDeliveryReport(records);
-            UI.showTab('campaign-history');
+            UI.showTab('campaigns');
         } catch (err) {
             UI.showError('Failed to load delivery report: ' + err.message);
         }

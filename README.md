@@ -19,6 +19,10 @@
 
 <p align="center">
 <img src="./1.gif" alt="Dashboard Overview" width="80%">
+<br><br>
+<img src="./2.gif" alt="Email Campaign Process" width="80%">
+<br><br>
+<img src="./3.gif" alt="Email Showcase" width="80%">
 </p>
 
 ## The Problem

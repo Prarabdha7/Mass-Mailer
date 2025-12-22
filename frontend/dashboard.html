@@ -230,6 +230,7 @@
                         <div class="wizard-step" data-step="4"><span>4</span> Customize</div>
                         <div class="wizard-step" data-step="5"><span>5</span> Recipients</div>
                         <div class="wizard-step" data-step="6"><span>6</span> Review</div>
+                        <div class="wizard-step" data-step="7"><span>7</span> Sending</div>
                     </div>
 
                     <div class="wizard-body">
@@ -311,7 +312,9 @@
                             <div id="wizardVariableEditor" class="variable-editor-panel" style="display: none;">
                                 <div class="variable-editor-header">
                                     <h4>Template Variables</h4>
-                                    <small>Fill in values for placeholders (except name/email which come from CSV)</small>
+                                    <small>Fill in values for placeholders (except name/email from CSV). <span
+                                            class="tip">💡 Tip: Type <code>none</code> to remove a field
+                                            entirely.</span></small>
                                 </div>
                                 <div id="wizardVariableList" class="variable-list"></div>
                             </div>
@@ -395,6 +398,10 @@
                                     <label>Recipients</label>
                                     <span id="reviewRecipients">0 recipients</span>
                                 </div>
+                                <div class="review-item">
+                                    <label>Template Variables</label>
+                                    <div id="reviewTemplateVars" class="review-vars">None set</div>
+                                </div>
                             </div>
                             <div class="form-row" style="margin-top: 20px;">
                                 <div class="form-group">
@@ -404,6 +411,34 @@
                                 <div class="form-group">
                                     <label for="wizardDelaySeconds">Delay (seconds)</label>
                                     <input type="number" id="wizardDelaySeconds" value="2" min="0" step="0.5">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 7: Sending Status -->
+                        <div class="wizard-panel" data-step="7">
+                            <h3>Sending Campaign</h3>
+                            <div class="wizard-sending-status">
+                                <div class="sending-animation">
+                                    <div class="sending-spinner"></div>
+                                </div>
+                                <p id="wizardSendingMessage" class="sending-message">Preparing to send emails...</p>
+                                <div class="wizard-progress-bar">
+                                    <div id="wizardProgressFill" class="progress-fill" style="width: 0%;"></div>
+                                </div>
+                                <div class="wizard-sending-stats">
+                                    <div class="stat-item sent">
+                                        <span class="stat-value" id="wizardSentCount">0</span>
+                                        <span class="stat-label">Sent</span>
+                                    </div>
+                                    <div class="stat-item failed">
+                                        <span class="stat-value" id="wizardFailedCount">0</span>
+                                        <span class="stat-label">Failed</span>
+                                    </div>
+                                    <div class="stat-item total">
+                                        <span class="stat-value" id="wizardTotalCount">0</span>
+                                        <span class="stat-label">Total</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

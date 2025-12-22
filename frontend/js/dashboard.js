@@ -902,14 +902,18 @@ const Dashboard = {
         else if (s === 4) { const t = document.getElementById('wizardTemplate')?.value.trim(); if (!t) { UI.showError('Create or select template'); return; } this.wizardData.templateContent = t; }
         else if (s === 5) {
             // Check if manual mode and collect recipients
-            if (this.wizardData.recipientMode === 'manual') {
-                const manualRecipients = this.collectManualRecipients();
+            // Also check if user typed in manual fields even without clicking the toggle
+            const manualRecipients = this.collectManualRecipients();
+
+            if (this.wizardData.recipientMode === 'manual' || manualRecipients.length > 0) {
+                // Manual mode or user has entered manual recipients
                 if (manualRecipients.length === 0) {
                     UI.showError('Add at least one recipient with email');
                     return;
                 }
                 this.wizardData.recipients = manualRecipients;
             } else if (this.wizardData.recipients.length === 0) {
+                // CSV mode but no CSV uploaded
                 UI.showError('Upload CSV or add recipients manually');
                 return;
             }
@@ -926,7 +930,35 @@ const Dashboard = {
         document.getElementById('wizardBackBtn').style.display = s > 1 ? '' : 'none';
         document.getElementById('wizardNextBtn').style.display = s < 6 ? '' : 'none';
         document.getElementById('wizardLaunchBtn').style.display = s === 6 ? '' : 'none';
-        if (s === 6) { document.getElementById('reviewCampaignName').textContent = this.wizardData.campaignName; document.getElementById('reviewSubject').textContent = this.wizardData.subject; document.getElementById('reviewRecipients').textContent = this.wizardData.recipients.length + ' recipients'; }
+
+        if (s === 6) {
+            // Populate review with all wizard data
+            document.getElementById('reviewCampaignName').textContent = this.wizardData.campaignName || '-';
+            document.getElementById('reviewSubject').textContent = this.wizardData.subject || '-';
+
+            // Show recipient count with valid/invalid breakdown
+            const validRecipients = this.wizardData.recipients.filter(r => r.validationStatus !== 'invalid').length;
+            const totalRecipients = this.wizardData.recipients.length;
+            if (validRecipients < totalRecipients) {
+                document.getElementById('reviewRecipients').innerHTML = `<span style="color:#7cb97c">${validRecipients} valid</span> / ${totalRecipients} total`;
+            } else {
+                document.getElementById('reviewRecipients').textContent = totalRecipients + ' recipients';
+            }
+
+            // Show template variables if any were set
+            const varCount = Object.keys(this.wizardData.templateVariables || {}).length;
+            const varsEl = document.getElementById('reviewTemplateVars');
+            if (varsEl) {
+                if (varCount > 0) {
+                    varsEl.innerHTML = Object.entries(this.wizardData.templateVariables)
+                        .slice(0, 3)
+                        .map(([k, v]) => `<span class="review-var"><code>{{${k}}}</code>: ${this.escapeHtml(v.substring(0, 30))}${v.length > 30 ? '...' : ''}</span>`)
+                        .join('') + (varCount > 3 ? `<span class="review-var-more">+${varCount - 3} more</span>` : '');
+                } else {
+                    varsEl.textContent = 'None set';
+                }
+            }
+        }
     },
 
     updateWizardPreview() {
@@ -940,7 +972,13 @@ const Dashboard = {
         placeholders.forEach(p => {
             const key = p.replace(/\{\{|\}\}/g, '');
             // Use templateVariables (user-provided) first, then previewData (defaults), then keep placeholder
-            const value = this.wizardData.templateVariables[key] || this.previewData[key] || `{{${key}}}`;
+            let value = this.wizardData.templateVariables[key] || this.previewData[key] || `{{${key}}}`;
+
+            // If value is "none" (case insensitive), remove the placeholder entirely
+            if (value.toLowerCase() === 'none') {
+                value = '';
+            }
+
             rendered = rendered.replace(new RegExp(p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), value);
         });
 
@@ -1010,14 +1048,80 @@ const Dashboard = {
     async handleWizardCsvUpload(e) {
         const file = e.target.files?.[0]; if (!file) return;
         const preview = document.getElementById('wizardCsvPreview');
+        if (preview) preview.innerHTML = '<p class="loading">Parsing and validating emails...</p>';
+
         try {
             const csv = await Campaign.parseCSV(file);
             this.wizardData.csvData = csv;
             const emailCol = csv.headers.find(h => h.toLowerCase().includes('email')) || csv.headers[0];
             const nameCol = csv.headers.find(h => h.toLowerCase().includes('name')) || csv.headers[1] || csv.headers[0];
             this.wizardData.recipients = Campaign.extractRecipients(csv.rows, emailCol, nameCol);
-            if (preview) preview.innerHTML = `< p class="success" >✓ ${csv.rows.length} recipients loaded</p > `;
-        } catch (err) { if (preview) preview.innerHTML = `< p class="error" > ${err.message}</p > `; }
+
+            // Validate emails
+            const emails = this.wizardData.recipients.map(r => r.email);
+            let validationResults = [];
+
+            try {
+                const response = await API.validateEmails(emails);
+                validationResults = this.applyCustomValidation(response.results || response);
+            } catch (err) {
+                // If validation fails, mark all as valid (fallback)
+                validationResults = emails.map(email => ({ email, status: 'valid', reason: null }));
+            }
+
+            const valid = validationResults.filter(r => r.status === 'valid');
+            const invalid = validationResults.filter(r => r.status !== 'valid');
+
+            // Mark recipients with validation status
+            this.wizardData.recipients = this.wizardData.recipients.map(r => {
+                const result = validationResults.find(v => v.email === r.email);
+                return { ...r, validationStatus: result?.status || 'valid', validationReason: result?.reason };
+            });
+
+            // Build preview HTML
+            let html = `
+                <div class="recipient-validation-summary">
+                    <div class="validation-stat valid">
+                        <span class="stat-number">${valid.length}</span>
+                        <span class="stat-label">Valid</span>
+                    </div>
+                    <div class="validation-stat invalid">
+                        <span class="stat-number">${invalid.length}</span>
+                        <span class="stat-label">Invalid</span>
+                    </div>
+                    <div class="validation-stat total">
+                        <span class="stat-number">${validationResults.length}</span>
+                        <span class="stat-label">Total</span>
+                    </div>
+                </div>
+            `;
+
+            // Show first few recipients preview
+            const previewRecipients = this.wizardData.recipients.slice(0, 8);
+            html += `<div class="recipient-preview-list">`;
+            previewRecipients.forEach(r => {
+                const isValid = r.validationStatus === 'valid';
+                html += `
+                    <div class="recipient-preview-item ${isValid ? 'valid' : 'invalid'}">
+                        <span class="recipient-email">${this.escapeHtml(r.email)}</span>
+                        <span class="recipient-name">${this.escapeHtml(r.name || '')}</span>
+                        <span class="recipient-status ${isValid ? 'status-valid' : 'status-invalid'}">${isValid ? '✓' : '✗'}</span>
+                    </div>
+                `;
+            });
+            if (this.wizardData.recipients.length > 8) {
+                html += `<div class="recipient-preview-more">+${this.wizardData.recipients.length - 8} more recipients</div>`;
+            }
+            html += `</div>`;
+
+            if (invalid.length > 0) {
+                html += `<p class="validation-warning">⚠️ ${invalid.length} invalid email(s) will be skipped when sending.</p>`;
+            }
+
+            if (preview) preview.innerHTML = html;
+        } catch (err) {
+            if (preview) preview.innerHTML = `<p class="error">${err.message}</p>`;
+        }
     },
 
     saveWizardDraft() {
@@ -1027,8 +1131,10 @@ const Dashboard = {
     },
 
     async launchFromWizard() {
-        if (!this.wizardData.campaignName || !this.wizardData.subject || !this.wizardData.templateContent || !this.wizardData.recipients.length) { UI.showError('Complete all steps'); return; }
-        this.closeWizard();
+        if (!this.wizardData.campaignName || !this.wizardData.subject || !this.wizardData.templateContent || !this.wizardData.recipients.length) {
+            UI.showError('Complete all steps');
+            return;
+        }
 
         // Merge template variables with each recipient's variables
         const recipientsWithVars = this.wizardData.recipients.map(r => ({
@@ -1036,6 +1142,7 @@ const Dashboard = {
             variables: { ...this.wizardData.templateVariables, ...r.variables }
         }));
 
+        // Set pending form data for sendCampaign
         this.pendingFormData = {
             name: this.wizardData.campaignName,
             subject: this.wizardData.subject,
@@ -1044,8 +1151,115 @@ const Dashboard = {
             batch_size: parseInt(document.getElementById('wizardBatchSize')?.value) || 10,
             delay_seconds: parseFloat(document.getElementById('wizardDelaySeconds')?.value) || 2
         };
-        this.showEditorView();
-        await this.validateEmails(recipientsWithVars);
+
+        // Show step 7 (Sending) in wizard
+        this.wizardData.currentStep = 7;
+        this.wizardData.totalSteps = 7;
+        this.updateWizardStep();
+
+        // Initialize wizard sending stats (only count valid recipients)
+        const validCount = recipientsWithVars.filter(r => r.validationStatus !== 'invalid').length;
+        document.getElementById('wizardTotalCount').textContent = validCount;
+        document.getElementById('wizardSentCount').textContent = '0';
+        document.getElementById('wizardFailedCount').textContent = '0';
+        document.getElementById('wizardProgressFill').style.width = '0%';
+        document.getElementById('wizardSendingMessage').textContent = `Sending ${validCount} emails...`;
+
+        // Hide footer buttons during sending
+        document.getElementById('wizardBackBtn').style.display = 'none';
+        document.getElementById('wizardNextBtn').style.display = 'none';
+        document.getElementById('wizardLaunchBtn').style.display = 'none';
+        document.getElementById('wizardSaveDraftBtn').style.display = 'none';
+
+        // Send the campaign
+        await this.sendCampaignFromWizard(recipientsWithVars);
+    },
+
+    async sendCampaignFromWizard(recipients) {
+        const { name, subject, template, batch_size, delay_seconds } = this.pendingFormData;
+
+        // Filter to only valid recipients
+        const validRecipients = recipients.filter(r => r.validationStatus !== 'invalid');
+
+        try {
+            const result = await API.sendCampaign({ subject, template, recipients: validRecipients, batch_size, delay_seconds });
+            this.currentCampaignId = result.campaign_id;
+
+            const campaign = {
+                id: result.campaign_id,
+                name: name,
+                subject: subject,
+                recipientCount: validRecipients.length,
+                createdAt: new Date().toISOString(),
+                status: 'running'
+            };
+            this.campaigns.unshift(campaign);
+            this.saveToStorage();
+            this.addLog('campaign', 'Campaign started: ' + name, validRecipients.length + ' valid recipients');
+
+            // Start polling for status updates in wizard
+            this.startWizardPolling();
+        } catch (err) {
+            document.getElementById('wizardSendingMessage').textContent = 'Failed: ' + err.message;
+            UI.showError('Failed to send campaign: ' + err.message);
+        }
+    },
+
+    startWizardPolling() {
+        if (this.wizardPollInterval) clearInterval(this.wizardPollInterval);
+        this.wizardPollInterval = setInterval(() => this.pollWizardStatus(), 2000);
+        this.pollWizardStatus();
+    },
+
+    async pollWizardStatus() {
+        if (!this.currentCampaignId) return;
+
+        try {
+            const status = await API.getCampaignStatus(this.currentCampaignId);
+
+            // Update wizard UI
+            const total = status.total || 0;
+            const sent = status.sent || 0;
+            const failed = status.failed || 0;
+            const progress = total > 0 ? ((sent + failed) / total * 100) : 0;
+
+            document.getElementById('wizardSentCount').textContent = sent;
+            document.getElementById('wizardFailedCount').textContent = failed;
+            document.getElementById('wizardProgressFill').style.width = progress + '%';
+            document.getElementById('wizardSendingMessage').textContent = `Sending emails... ${sent + failed}/${total}`;
+
+            if (status.status === 'completed' || status.status === 'failed') {
+                clearInterval(this.wizardPollInterval);
+                this.wizardPollInterval = null;
+
+                // Hide spinner
+                const spinnerWrapper = document.querySelector('.wizard-panel[data-step="7"] .sending-animation');
+                if (spinnerWrapper) spinnerWrapper.style.display = 'none';
+
+                // Update campaign record
+                const campaign = this.campaigns.find(c => c.id === this.currentCampaignId);
+                if (campaign) {
+                    campaign.status = status.status;
+                    campaign.sent = sent;
+                    campaign.failed = failed;
+                    this.saveToStorage();
+                }
+
+                if (status.status === 'completed') {
+                    document.getElementById('wizardSendingMessage').innerHTML = `<span style="color:#7cb97c">✓ Campaign completed!</span>`;
+                    UI.showSuccess('Campaign completed!');
+                    this.addLog('campaign', 'Campaign completed', 'Sent: ' + sent + ', Failed: ' + failed);
+                } else {
+                    document.getElementById('wizardSendingMessage').innerHTML = `<span style="color:#c97c7c">✗ Campaign failed</span>`;
+                    UI.showError('Campaign failed');
+                }
+
+                // Show close button
+                document.getElementById('closeWizardBtn').style.display = 'block';
+            }
+        } catch (err) {
+            document.getElementById('wizardSendingMessage').textContent = 'Error checking status';
+        }
     },
 
     showCampaignList() { document.getElementById('campaignListView').style.display = 'block'; document.getElementById('campaignEditorView').style.display = 'none'; },
@@ -1062,7 +1276,7 @@ const Dashboard = {
         document.getElementById('editDelaySeconds').value = c.delaySeconds || 2;
         document.getElementById('editorCampaignTitle').textContent = 'Edit: ' + (c.name || 'Campaign');
         this.editRecipients = c.recipients || [];
-        const p = document.getElementById('editCsvPreview'); if (p && this.editRecipients.length) p.innerHTML = `< p class="success" >✓ ${this.editRecipients.length} recipients</p > `;
+        const p = document.getElementById('editCsvPreview'); if (p && this.editRecipients.length) p.innerHTML = `<p class="success">✓ ${this.editRecipients.length} recipients</p>`;
         this.showEditorView();
     },
 
@@ -1077,8 +1291,8 @@ const Dashboard = {
             const emailCol = csv.headers.find(h => h.toLowerCase().includes('email')) || csv.headers[0];
             const nameCol = csv.headers.find(h => h.toLowerCase().includes('name')) || csv.headers[1] || csv.headers[0];
             this.editRecipients = Campaign.extractRecipients(csv.rows, emailCol, nameCol);
-            if (preview) preview.innerHTML = `< p class="success" >✓ ${csv.rows.length} recipients</p > `;
-        } catch (err) { if (preview) preview.innerHTML = `< p class="error" > ${err.message}</p > `; }
+            if (preview) preview.innerHTML = `<p class="success">✓ ${csv.rows.length} recipients</p>`;
+        } catch (err) { if (preview) preview.innerHTML = `<p class="error">${err.message}</p>`; }
     },
 
     saveEditorDraft() {

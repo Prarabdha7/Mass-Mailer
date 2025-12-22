@@ -113,7 +113,7 @@ flowchart LR
 
 ```bash
 # 1. Clone
-git clone <repo-url> && cd mass-mailer
+git clone https://github.com/Prarabdha7/Mass-Mailer && cd mass-mailer
 
 # 2. Install
 cd backend && pip install -r requirements.txt && cd ..

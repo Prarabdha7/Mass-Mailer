@@ -237,15 +237,6 @@ mass-mailer/
 | `/api/campaign-status/:id` | `GET` | Track progress |
 | `/api/delivery-report/:id` | `GET` | Get detailed report |
 
-## Testing
-
-```bash
-# Backend
-cd backend && pytest
-
-# Frontend
-cd frontend && npm test
-```
 
 ---
 

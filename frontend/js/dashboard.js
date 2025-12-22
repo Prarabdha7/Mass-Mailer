@@ -1,287 +1,291 @@
 const Dashboard = {
-        currentCampaignId: null,
-        validRecipients: [],
-        allDeliveryRecords: [],
-        pollInterval: null,
-        csvData: null,
-        templates: [],
-        campaigns: [],
-        logs: [],
-        settings: {
-            whitelistDomains: [],
-            blacklistDomains: [],
-            customValidEmails: [],
-            skipMxCheck: false,
-            allowPlusAddressing: true,
-            defaultBatchSize: 10,
-            defaultDelay: 2
-        },
+    currentCampaignId: null,
+    validRecipients: [],
+    allDeliveryRecords: [],
+    pollInterval: null,
+    csvData: null,
+    templates: [],
+    campaigns: [],
+    logs: [],
+    settings: {
+        whitelistDomains: [],
+        blacklistDomains: [],
+        customValidEmails: [],
+        skipMxCheck: false,
+        allowPlusAddressing: true,
+        defaultBatchSize: 10,
+        defaultDelay: 2
+    },
 
-        async init() {
-            console.log('Dashboard.init() called');
-            this.initSidebar();
-            this.initTabs();
-            this.initLogout();
-            this.initCampaignForm();
-            this.initTemplates();
-            this.initDeliveryReport();
-            this.initTestEmail();
-            this.initLogs();
-            this.initSettings();
+    async init() {
+        console.log('Dashboard.init() called');
+        this.initSidebar();
+        this.initTabs();
+        this.initLogout();
+        this.initCampaignForm();
+        this.initCampaignWizard();
+        this.initCampaignEditor();
+        this.initTemplates();
+        this.initDeliveryReport();
+        this.initTestEmail();
+        this.initLogs();
+        this.initSettings();
 
-            await this.loadFromStorage();
-            console.log(`After loadFromStorage: this.templates.length = ${this.templates.length}`);
+        await this.loadFromStorage();
+        console.log(`After loadFromStorage: this.templates.length = ${this.templates.length}`);
 
-            this.renderCampaignList();
-            this.renderTemplateList();
-            this.populateTemplateSelect();
-            this.renderLogs();
-            this.applyDefaultSettings();
+        this.renderCampaignGrid();
+        this.renderTemplateList();
+        this.populateTemplateSelect();
+        this.populateWizardTemplateSelect();
+        this.renderLogs();
+        this.applyDefaultSettings();
 
-            // Verify templates loaded - if still 0, try direct access to EmailTemplates
-            if (this.templates.length === 0) {
-                console.warn('No templates in this.templates after loading. Checking EmailTemplates directly...');
-                if (typeof EmailTemplates !== 'undefined' && Array.isArray(EmailTemplates) && EmailTemplates.length > 0) {
-                    console.warn(`EmailTemplates array exists with ${EmailTemplates.length} items, but wasn't loaded properly. Forcing reload...`);
-                    this.templates = EmailTemplates.map(t => ({...t }));
-                    console.log(`Forced reload: this.templates.length = ${this.templates.length}`);
-                    this.renderTemplateList();
-                    this.populateTemplateSelect();
-                } else {
-                    console.error('EmailTemplates is not available or empty:', {
-                        defined: typeof EmailTemplates !== 'undefined',
-                        isArray: Array.isArray(EmailTemplates),
-                        length: typeof EmailTemplates !== 'undefined' ? EmailTemplates.length : 'N/A'
-                    });
-                }
-            } else {
-                console.log(`✓ Successfully loaded ${this.templates.length} templates`);
-            }
-        },
-
-        async loadFromStorage() {
-            try {
-                this.campaigns = JSON.parse(localStorage.getItem('mailer_campaigns') || '[]');
-                const savedSettings = JSON.parse(localStorage.getItem('mailer_settings') || '{}');
-                this.settings = {...this.settings, ...savedSettings };
-            } catch (e) {
-                this.campaigns = [];
-            }
-
-            // Load default templates from hardcoded array
-            // Check if EmailTemplates is available (should be loaded from email-templates.js)
-            if (typeof EmailTemplates === 'undefined') {
-                console.error('EmailTemplates is not defined! Make sure email-templates.js is loaded before dashboard.js');
-            }
-
-            const defaultTemplates = (typeof EmailTemplates !== 'undefined' && Array.isArray(EmailTemplates) && EmailTemplates.length > 0) ?
-                EmailTemplates.map(t => ({...t })) // Create copies to avoid mutations
-                :
-                [];
-
-            // Start with default templates
-            this.templates = [...defaultTemplates];
-            console.log(`Initialized with ${defaultTemplates.length} default templates`, defaultTemplates.length > 0 ? '(EmailTemplates loaded)' : '(EmailTemplates empty or undefined)');
-
-            // Load custom templates from backend
-            try {
-                const response = await API.getCustomTemplates();
-                if (response && response.templates && Array.isArray(response.templates)) {
-                    const customTemplates = response.templates;
-                    this.templates = [...defaultTemplates, ...customTemplates];
-                    console.log(`Loaded ${defaultTemplates.length} default templates and ${customTemplates.length} custom templates from backend`);
-                } else {
-                    console.warn('Backend returned invalid template format:', response);
-                }
-            } catch (e) {
-                console.error('Failed to load custom templates from backend:', e.message || e);
-                // Continue with default templates only if backend call fails
-                console.log(`Using ${defaultTemplates.length} default templates only (backend unavailable)`);
-            }
-
-            // Ensure we have templates
-            if (this.templates.length === 0) {
-                console.error('WARNING: No templates available! EmailTemplates array may not be loaded.');
-            }
-
-            try {
-                const response = await API.getLogs();
-                this.logs = (response.logs || []).reverse();
-            } catch (e) {
-                this.logs = [];
-            }
-        },
-
-        async resetTemplates() {
-            if (confirm('This will remove all your custom templates. Default templates will remain. Continue?')) {
-                try {
-                    const response = await API.getCustomTemplates();
-                    const customTemplates = response.templates || [];
-                    for (const t of customTemplates) {
-                        if (t.id) await API.deleteCustomTemplate(t.id);
-                    }
-                } catch (e) {}
-                this.templates = typeof EmailTemplates !== 'undefined' ? [...EmailTemplates] : [];
+        // Verify templates loaded - if still 0, try direct access to EmailTemplates
+        if (this.templates.length === 0) {
+            console.warn('No templates in this.templates after loading. Checking EmailTemplates directly...');
+            if (typeof EmailTemplates !== 'undefined' && Array.isArray(EmailTemplates) && EmailTemplates.length > 0) {
+                console.warn(`EmailTemplates array exists with ${EmailTemplates.length} items, but wasn't loaded properly. Forcing reload...`);
+                this.templates = EmailTemplates.map(t => ({ ...t }));
+                console.log(`Forced reload: this.templates.length = ${this.templates.length}`);
                 this.renderTemplateList();
                 this.populateTemplateSelect();
-                UI.showSuccess('Custom templates cleared! ' + this.templates.length + ' default templates loaded.');
-                this.addLog('campaign', 'Custom templates cleared');
+                this.populateWizardTemplateSelect();
+            } else {
+                console.error('EmailTemplates is not available or empty:', {
+                    defined: typeof EmailTemplates !== 'undefined',
+                    isArray: Array.isArray(EmailTemplates),
+                    length: typeof EmailTemplates !== 'undefined' ? EmailTemplates.length : 'N/A'
+                });
             }
-        },
+        } else {
+            console.log(`✓ Successfully loaded ${this.templates.length} templates`);
+        }
+    },
 
-        getDefaultTemplates() {
-            return typeof EmailTemplates !== 'undefined' ? [...EmailTemplates] : [];
-        },
+    async loadFromStorage() {
+        try {
+            this.campaigns = JSON.parse(localStorage.getItem('mailer_campaigns') || '[]');
+            const savedSettings = JSON.parse(localStorage.getItem('mailer_settings') || '{}');
+            this.settings = { ...this.settings, ...savedSettings };
+        } catch (e) {
+            this.campaigns = [];
+        }
 
-        saveToStorage() {
-            localStorage.setItem('mailer_campaigns', JSON.stringify(this.campaigns));
-            localStorage.setItem('mailer_settings', JSON.stringify(this.settings));
-        },
+        // Load default templates from hardcoded array
+        // Check if EmailTemplates is available (should be loaded from email-templates.js)
+        if (typeof EmailTemplates === 'undefined') {
+            console.error('EmailTemplates is not defined! Make sure email-templates.js is loaded before dashboard.js');
+        }
 
-        async addLog(type, message, details = null) {
-            const log = {
-                id: Date.now(),
-                type: type,
-                message: message,
-                details: details,
-                timestamp: new Date().toISOString()
-            };
-            this.logs.unshift(log);
-            if (this.logs.length > 500) this.logs = this.logs.slice(0, 500);
-            this.renderLogs();
+        const defaultTemplates = (typeof EmailTemplates !== 'undefined' && Array.isArray(EmailTemplates) && EmailTemplates.length > 0) ?
+            EmailTemplates.map(t => ({ ...t })) // Create copies to avoid mutations
+            :
+            [];
+
+        // Start with default templates
+        this.templates = [...defaultTemplates];
+        console.log(`Initialized with ${defaultTemplates.length} default templates`, defaultTemplates.length > 0 ? '(EmailTemplates loaded)' : '(EmailTemplates empty or undefined)');
+
+        // Load custom templates from backend
+        try {
+            const response = await API.getCustomTemplates();
+            if (response && response.templates && Array.isArray(response.templates)) {
+                const customTemplates = response.templates;
+                this.templates = [...defaultTemplates, ...customTemplates];
+                console.log(`Loaded ${defaultTemplates.length} default templates and ${customTemplates.length} custom templates from backend`);
+            } else {
+                console.warn('Backend returned invalid template format:', response);
+            }
+        } catch (e) {
+            console.error('Failed to load custom templates from backend:', e.message || e);
+            // Continue with default templates only if backend call fails
+            console.log(`Using ${defaultTemplates.length} default templates only (backend unavailable)`);
+        }
+
+        // Ensure we have templates
+        if (this.templates.length === 0) {
+            console.error('WARNING: No templates available! EmailTemplates array may not be loaded.');
+        }
+
+        try {
+            const response = await API.getLogs();
+            this.logs = (response.logs || []).reverse();
+        } catch (e) {
+            this.logs = [];
+        }
+    },
+
+    async resetTemplates() {
+        if (confirm('This will remove all your custom templates. Default templates will remain. Continue?')) {
             try {
-                await API.addLog({ type, message, details });
-            } catch (e) {}
-        },
+                const response = await API.getCustomTemplates();
+                const customTemplates = response.templates || [];
+                for (const t of customTemplates) {
+                    if (t.id) await API.deleteCustomTemplate(t.id);
+                }
+            } catch (e) { }
+            this.templates = typeof EmailTemplates !== 'undefined' ? [...EmailTemplates] : [];
+            this.renderTemplateList();
+            this.populateTemplateSelect();
+            UI.showSuccess('Custom templates cleared! ' + this.templates.length + ' default templates loaded.');
+            this.addLog('campaign', 'Custom templates cleared');
+        }
+    },
 
-        initSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const appContainer = document.querySelector('.app-container');
+    getDefaultTemplates() {
+        return typeof EmailTemplates !== 'undefined' ? [...EmailTemplates] : [];
+    },
 
-            if (!sidebar || !appContainer) {
-                console.error('Sidebar elements not found');
+    saveToStorage() {
+        localStorage.setItem('mailer_campaigns', JSON.stringify(this.campaigns));
+        localStorage.setItem('mailer_settings', JSON.stringify(this.settings));
+    },
+
+    async addLog(type, message, details = null) {
+        const log = {
+            id: Date.now(),
+            type: type,
+            message: message,
+            details: details,
+            timestamp: new Date().toISOString()
+        };
+        this.logs.unshift(log);
+        if (this.logs.length > 500) this.logs = this.logs.slice(0, 500);
+        this.renderLogs();
+        try {
+            await API.addLog({ type, message, details });
+        } catch (e) { }
+    },
+
+    initSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const appContainer = document.querySelector('.app-container');
+
+        if (!sidebar || !appContainer) {
+            console.error('Sidebar elements not found');
+            return;
+        }
+
+        // Load saved sidebar state
+        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        if (isCollapsed) {
+            sidebar.classList.add('collapsed');
+            appContainer.classList.add('sidebar-collapsed');
+        }
+
+        // Toggle sidebar on button click
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const isCurrentlyCollapsed = sidebar.classList.contains('collapsed');
+
+                if (isCurrentlyCollapsed) {
+                    sidebar.classList.remove('collapsed');
+                    appContainer.classList.remove('sidebar-collapsed');
+                    localStorage.setItem('sidebarCollapsed', 'false');
+                } else {
+                    sidebar.classList.add('collapsed');
+                    appContainer.classList.add('sidebar-collapsed');
+                    localStorage.setItem('sidebarCollapsed', 'true');
+                }
+            });
+        } else {
+            console.error('Sidebar toggle button not found');
+        }
+    },
+
+    initTabs() {
+        document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                UI.showTab(btn.dataset.tab);
+            });
+        });
+    },
+
+    initLogout() {
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+                await Auth.logout();
+                window.location.href = '/login';
+            });
+        }
+    },
+
+    initCampaignForm() {
+        const csvFileInput = document.getElementById('csvFile');
+        const templateInput = document.getElementById('template');
+        const campaignForm = document.getElementById('campaignForm');
+        const templateSelect = document.getElementById('templateSelect');
+
+        if (csvFileInput) csvFileInput.addEventListener('change', (e) => this.handleCSVUpload(e));
+        if (templateInput) templateInput.addEventListener('input', (e) => this.handleTemplateInput(e));
+        if (campaignForm) campaignForm.addEventListener('submit', (e) => this.handleFormSubmit(e));
+        if (templateSelect) templateSelect.addEventListener('change', (e) => this.loadSelectedTemplate(e));
+    },
+
+    populateTemplateSelect() {
+        const select = document.getElementById('templateSelect');
+        if (!select) return;
+        select.innerHTML = '<option value="">-- Select a template --</option>';
+        this.templates.forEach((t, i) => {
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.textContent = t.name;
+            select.appendChild(opt);
+        });
+    },
+
+    loadSelectedTemplate(e) {
+        const idx = e.target.value;
+        if (idx === '') return;
+        const template = this.templates[idx];
+        if (template) {
+            document.getElementById('template').value = template.content;
+            this.handleTemplateInput({ target: { value: template.content } });
+        }
+    },
+
+    async handleCSVUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const csvPreview = document.getElementById('csvPreview');
+
+        csvPreview.innerHTML = '<p class="loading">Parsing CSV file...</p>';
+
+        try {
+            this.csvData = await Campaign.parseCSV(file);
+            const { headers, rows, warnings } = this.csvData;
+
+            if (rows.length === 0) {
+                csvPreview.innerHTML = '<p class="error">No data rows found in CSV</p>';
                 return;
             }
 
-            // Load saved sidebar state
-            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-            if (isCollapsed) {
-                sidebar.classList.add('collapsed');
-                appContainer.classList.add('sidebar-collapsed');
-            }
+            const emailCol = headers.find(h => h.toLowerCase().includes('email')) || headers[0];
+            const nameCol = headers.find(h => h.toLowerCase().includes('name')) || headers[1] || headers[0];
 
-            // Toggle sidebar on button click
-            if (sidebarToggle) {
-                sidebarToggle.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
+            let previewHtml = `<p><strong>${rows.length}</strong> recipients found</p>`;
 
-                    const isCurrentlyCollapsed = sidebar.classList.contains('collapsed');
-
-                    if (isCurrentlyCollapsed) {
-                        sidebar.classList.remove('collapsed');
-                        appContainer.classList.remove('sidebar-collapsed');
-                        localStorage.setItem('sidebarCollapsed', 'false');
-                    } else {
-                        sidebar.classList.add('collapsed');
-                        appContainer.classList.add('sidebar-collapsed');
-                        localStorage.setItem('sidebarCollapsed', 'true');
-                    }
-                });
-            } else {
-                console.error('Sidebar toggle button not found');
-            }
-        },
-
-        initTabs() {
-            document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    UI.showTab(btn.dataset.tab);
-                });
-            });
-        },
-
-        initLogout() {
-            const logoutBtn = document.getElementById('logoutBtn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', async() => {
-                    await Auth.logout();
-                    window.location.href = '/login';
-                });
-            }
-        },
-
-        initCampaignForm() {
-            const csvFileInput = document.getElementById('csvFile');
-            const templateInput = document.getElementById('template');
-            const campaignForm = document.getElementById('campaignForm');
-            const templateSelect = document.getElementById('templateSelect');
-
-            if (csvFileInput) csvFileInput.addEventListener('change', (e) => this.handleCSVUpload(e));
-            if (templateInput) templateInput.addEventListener('input', (e) => this.handleTemplateInput(e));
-            if (campaignForm) campaignForm.addEventListener('submit', (e) => this.handleFormSubmit(e));
-            if (templateSelect) templateSelect.addEventListener('change', (e) => this.loadSelectedTemplate(e));
-        },
-
-        populateTemplateSelect() {
-            const select = document.getElementById('templateSelect');
-            if (!select) return;
-            select.innerHTML = '<option value="">-- Select a template --</option>';
-            this.templates.forEach((t, i) => {
-                const opt = document.createElement('option');
-                opt.value = i;
-                opt.textContent = t.name;
-                select.appendChild(opt);
-            });
-        },
-
-        loadSelectedTemplate(e) {
-            const idx = e.target.value;
-            if (idx === '') return;
-            const template = this.templates[idx];
-            if (template) {
-                document.getElementById('template').value = template.content;
-                this.handleTemplateInput({ target: { value: template.content } });
-            }
-        },
-
-        async handleCSVUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const csvPreview = document.getElementById('csvPreview');
-
-            csvPreview.innerHTML = '<p class="loading">Parsing CSV file...</p>';
-
-            try {
-                this.csvData = await Campaign.parseCSV(file);
-                const { headers, rows, warnings } = this.csvData;
-
-                if (rows.length === 0) {
-                    csvPreview.innerHTML = '<p class="error">No data rows found in CSV</p>';
-                    return;
-                }
-
-                const emailCol = headers.find(h => h.toLowerCase().includes('email')) || headers[0];
-                const nameCol = headers.find(h => h.toLowerCase().includes('name')) || headers[1] || headers[0];
-
-                let previewHtml = `<p><strong>${rows.length}</strong> recipients found</p>`;
-
-                if (warnings && warnings.length > 0) {
-                    previewHtml += `<div class="csv-warnings">
+            if (warnings && warnings.length > 0) {
+                previewHtml += `<div class="csv-warnings">
                     <p class="warning-title">⚠️ Warnings (${warnings.length}):</p>
                     <ul>${warnings.slice(0, 5).map(w => `<li>${w}</li>`).join('')}</ul>
                     ${warnings.length > 5 ? `<p class="warning-more">...and ${warnings.length - 5} more warnings</p>` : ''}
                 </div>`;
             }
-            
+
             previewHtml += `<div class="column-select">
                 <label>Email column: <select id="emailColSelect">${headers.map(h => `<option value="${h}" ${h === emailCol ? 'selected' : ''}>${h}</option>`).join('')}</select></label>
                 <label>Name column: <select id="nameColSelect">${headers.map(h => `<option value="${h}" ${h === nameCol ? 'selected' : ''}>${h}</option>`).join('')}</select></label>
             </div>`;
-            
+
             const previewRows = rows.slice(0, 10);
             previewHtml += `<div class="csv-table-wrapper">
                 <table class="csv-table">
@@ -290,7 +294,7 @@ const Dashboard = {
                 </table>
                 ${rows.length > 10 ? `<p class="csv-more">...and ${rows.length - 10} more rows</p>` : ''}
             </div>`;
-            
+
             csvPreview.innerHTML = previewHtml;
         } catch (err) {
             csvPreview.innerHTML = `<div class="csv-error">
@@ -491,6 +495,529 @@ const Dashboard = {
         await this.loadDeliveryReport(campaignId);
     },
 
+    // Campaign Grid for new unified view
+    renderCampaignGrid() {
+        const container = document.getElementById('campaignGrid');
+        const countEl = document.getElementById('campaignCount');
+        if (!container) return;
+
+        if (countEl) countEl.textContent = this.campaigns.length;
+
+        if (this.campaigns.length === 0) {
+            container.innerHTML = '<p class="empty-state">No campaigns yet. Click "Create New Campaign" to get started!</p>';
+            return;
+        }
+
+        container.innerHTML = this.campaigns.map(c => {
+            const statusClass = c.status || 'draft';
+            const createdAt = c.createdAt ? new Date(c.createdAt).toLocaleDateString() : 'Unknown';
+            return `
+                <div class="campaign-card" data-id="${c.id}">
+                    <div class="campaign-card-header">
+                        <div class="campaign-card-name">${this.escapeHtml(c.name || 'Untitled')}</div>
+                        <div class="campaign-card-subject">${this.escapeHtml(c.subject || '')}</div>
+                    </div>
+                    <div class="campaign-card-body">
+                        <div class="campaign-card-stats">
+                            <div class="campaign-stat">
+                                <span class="campaign-stat-value">${c.recipientCount || 0}</span>
+                                <span class="campaign-stat-label">Recipients</span>
+                            </div>
+                            ${c.sent !== undefined ? `<div class="campaign-stat"><span class="campaign-stat-value">${c.sent}</span><span class="campaign-stat-label">Sent</span></div>` : ''}
+                        </div>
+                        <span class="campaign-card-status status-${statusClass}">${statusClass.charAt(0).toUpperCase() + statusClass.slice(1)}</span>
+                        <div class="campaign-card-date">${createdAt}</div>
+                    </div>
+                    <div class="campaign-card-footer">
+                        ${c.status === 'draft' ? `<button class="btn btn-primary" onclick="Dashboard.editCampaign('${c.id}')">Edit</button>` : ''}
+                        ${c.status !== 'draft' ? `<button class="btn btn-secondary" onclick="Dashboard.viewCampaignReport('${c.id}', '${this.escapeHtml(c.name || '')}')">Report</button>` : ''}
+                        <button class="btn btn-danger" onclick="Dashboard.deleteCampaign('${c.id}')">Delete</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    },
+
+    wizardData: { currentStep: 1, totalSteps: 6, campaignName: '', subject: '', templateType: 'default', templateContent: '', csvData: null, recipients: [], batchSize: 10, delaySeconds: 2 },
+
+    initCampaignWizard() {
+        const createBtn = document.getElementById('createCampaignBtn');
+        const closeBtn = document.getElementById('closeWizardBtn');
+        const nextBtn = document.getElementById('wizardNextBtn');
+        const backBtn = document.getElementById('wizardBackBtn');
+        const saveDraftBtn = document.getElementById('wizardSaveDraftBtn');
+        const launchBtn = document.getElementById('wizardLaunchBtn');
+        const wizardCsvFile = document.getElementById('wizardCsvFile');
+        const wizardFileUpload = document.getElementById('wizardFileUpload');
+        const wizardTemplateSelect = document.getElementById('wizardTemplateSelect');
+
+        if (createBtn) createBtn.addEventListener('click', () => this.openWizard());
+        if (closeBtn) closeBtn.addEventListener('click', () => this.closeWizard());
+        if (nextBtn) nextBtn.addEventListener('click', () => this.wizardNext());
+        if (backBtn) backBtn.addEventListener('click', () => this.wizardBack());
+        if (saveDraftBtn) saveDraftBtn.addEventListener('click', () => this.saveWizardDraft());
+        if (launchBtn) launchBtn.addEventListener('click', () => this.launchFromWizard());
+
+        document.querySelectorAll('.template-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('.template-option').forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+                this.wizardData.templateType = opt.dataset.option;
+                const area = document.getElementById('templateSelectArea');
+                if (area) area.style.display = opt.dataset.option === 'default' ? 'block' : 'none';
+            });
+        });
+
+        if (wizardFileUpload) {
+            wizardFileUpload.addEventListener('click', () => wizardCsvFile?.click());
+            wizardFileUpload.addEventListener('dragover', e => { e.preventDefault(); wizardFileUpload.classList.add('drag-over'); });
+            wizardFileUpload.addEventListener('dragleave', () => wizardFileUpload.classList.remove('drag-over'));
+            wizardFileUpload.addEventListener('drop', e => { e.preventDefault(); wizardFileUpload.classList.remove('drag-over'); const f = e.dataTransfer?.files[0]; if (f?.name.endsWith('.csv')) this.handleWizardCsvUpload({ target: { files: [f] } }); });
+        }
+        if (wizardCsvFile) wizardCsvFile.addEventListener('change', e => this.handleWizardCsvUpload(e));
+        if (wizardTemplateSelect) wizardTemplateSelect.addEventListener('change', e => { const idx = e.target.value; if (idx !== '' && this.templates[idx]) { this.wizardData.templateContent = this.templates[idx].content; document.getElementById('wizardTemplate').value = this.templates[idx].content; this.updateWizardPreview(); } });
+        document.getElementById('wizardTemplate')?.addEventListener('input', () => this.updateWizardPreview());
+
+        // Visual Edit button - opens placeholder editor
+        const visualEditBtn = document.getElementById('wizardVisualEditBtn');
+        if (visualEditBtn) {
+            visualEditBtn.addEventListener('click', () => {
+                this.openWizardPlaceholderEditor();
+            });
+        }
+
+        // Theme Edit button - opens theme editor
+        const themeEditBtn = document.getElementById('wizardThemeEditBtn');
+        if (themeEditBtn) {
+            themeEditBtn.addEventListener('click', () => {
+                this.openWizardThemeEditor();
+            });
+        }
+
+        // Recipient mode toggle (CSV vs Manual)
+        document.querySelectorAll('.recipient-mode-toggle .mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.recipient-mode-toggle .mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const mode = btn.dataset.mode;
+                document.getElementById('csvUploadMode').style.display = mode === 'csv' ? 'block' : 'none';
+                document.getElementById('manualEntryMode').style.display = mode === 'manual' ? 'block' : 'none';
+                this.wizardData.recipientMode = mode;
+            });
+        });
+
+        // Add recipient button
+        const addRecipientBtn = document.getElementById('addRecipientBtn');
+        if (addRecipientBtn) {
+            addRecipientBtn.addEventListener('click', () => this.addManualRecipientRow());
+        }
+
+        // Remove recipient (event delegation)
+        const recipientsList = document.getElementById('manualRecipientsList');
+        if (recipientsList) {
+            recipientsList.addEventListener('click', (e) => {
+                if (e.target.classList.contains('btn-remove-recipient')) {
+                    const row = e.target.closest('.manual-recipient-row');
+                    if (recipientsList.children.length > 1) {
+                        row.remove();
+                    } else {
+                        row.querySelectorAll('input').forEach(inp => inp.value = '');
+                    }
+                }
+            });
+        }
+    },
+
+    addManualRecipientRow() {
+        const list = document.getElementById('manualRecipientsList');
+        if (!list) return;
+        const row = document.createElement('div');
+        row.className = 'manual-recipient-row';
+        row.innerHTML = `
+            <input type="text" class="recipient-name" placeholder="Name">
+            <input type="email" class="recipient-email" placeholder="Email address">
+            <button type="button" class="btn-remove-recipient" title="Remove">×</button>
+        `;
+        list.appendChild(row);
+        row.querySelector('.recipient-name').focus();
+    },
+
+    collectManualRecipients() {
+        const rows = document.querySelectorAll('.manual-recipient-row');
+        const recipients = [];
+        rows.forEach(row => {
+            const name = row.querySelector('.recipient-name')?.value.trim() || '';
+            const email = row.querySelector('.recipient-email')?.value.trim() || '';
+            if (email) {
+                recipients.push({ name, email, variables: { name, email } });
+            }
+        });
+        return recipients;
+    },
+
+
+    openWizardPlaceholderEditor() {
+        const content = document.getElementById('wizardTemplate')?.value || '';
+        const placeholders = content.match(/\{\{(\w+)\}\}/g) || [];
+        const uniquePlaceholders = [...new Set(placeholders.map(p => p.replace(/\{\{|\}\}/g, '')))];
+
+        if (uniquePlaceholders.length === 0) {
+            UI.showError('No placeholders found in template. Add {{placeholder}} to your template.');
+            return;
+        }
+
+        let html = '<div class="preview-variables-grid">';
+        uniquePlaceholders.forEach(key => {
+            const value = this.previewData[key] || '';
+            html += `<div class="preview-var-item">
+                <label>${key}</label>
+                <input type="text" data-key="${key}" value="${this.escapeHtml(value)}" class="wizard-placeholder-input">
+            </div>`;
+        });
+        html += '</div>';
+
+        const modal = document.createElement('div');
+        modal.id = 'wizardPlaceholderModal';
+        modal.className = 'modal';
+        modal.style.display = 'flex';
+        modal.innerHTML = `
+            <div class="modal-content modal-large">
+                <h3>Edit Placeholder Values</h3>
+                <p class="modal-description">Set values for placeholders to see how your email will look.</p>
+                ${html}
+                <div class="modal-actions">
+                    <button id="applyWizardPlaceholders" class="btn btn-primary">Apply & Preview</button>
+                    <button id="cancelWizardPlaceholders" class="btn btn-secondary">Cancel</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        document.getElementById('applyWizardPlaceholders').addEventListener('click', () => {
+            modal.querySelectorAll('.wizard-placeholder-input').forEach(input => {
+                this.previewData[input.dataset.key] = input.value;
+            });
+            this.updateWizardPreview();
+            modal.remove();
+            UI.showSuccess('Placeholders updated!');
+        });
+
+        document.getElementById('cancelWizardPlaceholders').addEventListener('click', () => modal.remove());
+    },
+
+    openWizardThemeEditor() {
+        const content = document.getElementById('wizardTemplate')?.value || '';
+
+        // Extract current colors from template
+        const bgColorMatch = content.match(/background(?:-color)?:\s*(#[a-fA-F0-9]{3,6}|rgb[a]?\([^)]+\))/i);
+        const textColorMatch = content.match(/(?<!background-)color:\s*(#[a-fA-F0-9]{3,6}|rgb[a]?\([^)]+\))/i);
+        const btnColorMatch = content.match(/class="[^"]*(?:btn|button|cta)[^"]*"[^>]*style="[^"]*background(?:-color)?:\s*(#[a-fA-F0-9]{3,6})/i) ||
+            content.match(/background(?:-color)?:\s*(#[a-fA-F0-9]{3,6})[^>]*>.*(?:Get Started|Learn more|Click|Button)/i);
+
+        const currentBg = bgColorMatch ? bgColorMatch[1] : '#ffffff';
+        const currentText = textColorMatch ? textColorMatch[1] : '#333333';
+        const currentBtn = btnColorMatch ? btnColorMatch[1] : '#007bff';
+
+        const modal = document.createElement('div');
+        modal.id = 'wizardThemeModal';
+        modal.className = 'modal';
+        modal.style.display = 'flex';
+        modal.innerHTML = `
+            <div class="modal-content modal-large">
+                <h3>Edit Theme</h3>
+                <p class="modal-description">Customize colors and styles for your email template.</p>
+                <div class="theme-editor-grid">
+                    <div class="theme-section">
+                        <h4>Colors</h4>
+                        <div class="theme-field">
+                            <label>Background Color</label>
+                            <div class="color-input-wrapper">
+                                <input type="color" id="themeBgColor" value="${this.normalizeColor(currentBg)}">
+                                <input type="text" id="themeBgColorText" value="${currentBg}" placeholder="#ffffff">
+                            </div>
+                        </div>
+                        <div class="theme-field">
+                            <label>Text Color</label>
+                            <div class="color-input-wrapper">
+                                <input type="color" id="themeTextColor" value="${this.normalizeColor(currentText)}">
+                                <input type="text" id="themeTextColorText" value="${currentText}" placeholder="#333333">
+                            </div>
+                        </div>
+                        <div class="theme-field">
+                            <label>Button/CTA Color</label>
+                            <div class="color-input-wrapper">
+                                <input type="color" id="themeBtnColor" value="${this.normalizeColor(currentBtn)}">
+                                <input type="text" id="themeBtnColorText" value="${currentBtn}" placeholder="#007bff">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="theme-section">
+                        <h4>Typography</h4>
+                        <div class="theme-field">
+                            <label>Font Family</label>
+                            <select id="themeFontFamily">
+                                <option value="">Keep Original</option>
+                                <option value="Arial, sans-serif">Arial</option>
+                                <option value="'Helvetica Neue', Helvetica, sans-serif">Helvetica</option>
+                                <option value="Georgia, serif">Georgia</option>
+                                <option value="'Times New Roman', serif">Times New Roman</option>
+                                <option value="Verdana, sans-serif">Verdana</option>
+                                <option value="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">System UI</option>
+                            </select>
+                        </div>
+                        <div class="theme-field">
+                            <label>Base Font Size</label>
+                            <select id="themeFontSize">
+                                <option value="">Keep Original</option>
+                                <option value="14px">14px - Small</option>
+                                <option value="16px">16px - Normal</option>
+                                <option value="18px">18px - Large</option>
+                                <option value="20px">20px - Extra Large</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button id="applyWizardTheme" class="btn btn-primary">Apply Theme</button>
+                    <button id="cancelWizardTheme" class="btn btn-secondary">Cancel</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Sync color pickers with text inputs
+        ['Bg', 'Text', 'Btn'].forEach(type => {
+            const colorInput = document.getElementById(`theme${type}Color`);
+            const textInput = document.getElementById(`theme${type}ColorText`);
+            colorInput.addEventListener('input', () => textInput.value = colorInput.value);
+            textInput.addEventListener('input', () => { if (/^#[a-fA-F0-9]{6}$/.test(textInput.value)) colorInput.value = textInput.value; });
+        });
+
+        document.getElementById('applyWizardTheme').addEventListener('click', () => {
+            let newContent = document.getElementById('wizardTemplate').value;
+
+            const bgColor = document.getElementById('themeBgColorText').value;
+            const textColor = document.getElementById('themeTextColorText').value;
+            const btnColor = document.getElementById('themeBtnColorText').value;
+            const fontFamily = document.getElementById('themeFontFamily').value;
+            const fontSize = document.getElementById('themeFontSize').value;
+
+            // Apply color changes
+            if (bgColor) newContent = newContent.replace(/background(-color)?:\s*#[a-fA-F0-9]{3,6}/gi, `background$1: ${bgColor}`);
+            if (textColor) newContent = newContent.replace(/(?<!background-)color:\s*#[a-fA-F0-9]{3,6}/gi, `color: ${textColor}`);
+            if (btnColor) {
+                // For button backgrounds specifically
+                newContent = newContent.replace(/(class="[^"]*(?:btn|button|cta)[^"]*"[^>]*style="[^"]*background(?:-color)?:\s*)#[a-fA-F0-9]{3,6}/gi, `$1${btnColor}`);
+            }
+
+            // Apply font changes
+            if (fontFamily) {
+                if (newContent.includes('font-family:')) {
+                    newContent = newContent.replace(/font-family:[^;]+;/gi, `font-family: ${fontFamily};`);
+                } else if (newContent.includes('<body')) {
+                    newContent = newContent.replace(/<body([^>]*)>/i, `<body$1 style="font-family: ${fontFamily};">`);
+                }
+            }
+            if (fontSize) {
+                if (newContent.includes('font-size:')) {
+                    newContent = newContent.replace(/font-size:\s*\d+px/gi, `font-size: ${fontSize}`);
+                }
+            }
+
+            document.getElementById('wizardTemplate').value = newContent;
+            this.updateWizardPreview();
+            modal.remove();
+            UI.showSuccess('Theme applied!');
+        });
+
+        document.getElementById('cancelWizardTheme').addEventListener('click', () => modal.remove());
+    },
+
+    normalizeColor(color) {
+        if (!color) return '#ffffff';
+        if (color.startsWith('#') && color.length === 4) {
+            return '#' + color[1] + color[1] + color[2] + color[2] + color[3] + color[3];
+        }
+        if (color.startsWith('#') && color.length === 7) return color;
+        return '#ffffff';
+    },
+
+
+    initCampaignEditor() {
+        const backBtn = document.getElementById('backToListBtn');
+        const editorForm = document.getElementById('campaignEditorForm');
+        const saveDraftBtn = document.getElementById('saveDraftBtn');
+        const editTemplateSelect = document.getElementById('editTemplateSelect');
+        const editCsvFile = document.getElementById('editCsvFile');
+
+        if (backBtn) backBtn.addEventListener('click', () => this.showCampaignList());
+        if (editorForm) editorForm.addEventListener('submit', e => this.handleEditorSubmit(e));
+        if (saveDraftBtn) saveDraftBtn.addEventListener('click', () => this.saveEditorDraft());
+        if (editTemplateSelect) editTemplateSelect.addEventListener('change', e => { const idx = e.target.value; if (idx !== '' && this.templates[idx]) document.getElementById('editTemplate').value = this.templates[idx].content; });
+        if (editCsvFile) editCsvFile.addEventListener('change', e => this.handleEditorCsvUpload(e));
+    },
+
+    populateWizardTemplateSelect() {
+        ['wizardTemplateSelect', 'editTemplateSelect'].forEach(id => {
+            const sel = document.getElementById(id);
+            if (!sel) return;
+            sel.innerHTML = '<option value="">-- Choose template --</option>';
+            this.templates.forEach((t, i) => { const o = document.createElement('option'); o.value = i; o.textContent = t.name; sel.appendChild(o); });
+        });
+    },
+
+    openWizard() {
+        const modal = document.getElementById('campaignWizardModal');
+        if (!modal) return;
+        modal.style.display = 'flex';
+        this.wizardData = { currentStep: 1, totalSteps: 6, campaignName: '', subject: '', templateType: 'default', templateContent: '', csvData: null, recipients: [], batchSize: 10, delaySeconds: 2 };
+        document.getElementById('wizardCampaignName').value = '';
+        document.getElementById('wizardSubject').value = '';
+        document.getElementById('wizardTemplate').value = '';
+        document.getElementById('wizardCsvPreview').innerHTML = '';
+        this.updateWizardStep();
+        document.getElementById('wizardCampaignName')?.focus();
+    },
+
+    closeWizard() { const m = document.getElementById('campaignWizardModal'); if (m) m.style.display = 'none'; },
+
+    wizardNext() {
+        const s = this.wizardData.currentStep;
+        if (s === 1) { const n = document.getElementById('wizardCampaignName')?.value.trim(); if (!n) { UI.showError('Enter campaign name'); return; } this.wizardData.campaignName = n; }
+        else if (s === 2) { const n = document.getElementById('wizardSubject')?.value.trim(); if (!n) { UI.showError('Enter subject'); return; } this.wizardData.subject = n; }
+        else if (s === 4) { const t = document.getElementById('wizardTemplate')?.value.trim(); if (!t) { UI.showError('Create or select template'); return; } this.wizardData.templateContent = t; }
+        else if (s === 5) {
+            // Check if manual mode and collect recipients
+            if (this.wizardData.recipientMode === 'manual') {
+                const manualRecipients = this.collectManualRecipients();
+                if (manualRecipients.length === 0) {
+                    UI.showError('Add at least one recipient with email');
+                    return;
+                }
+                this.wizardData.recipients = manualRecipients;
+            } else if (this.wizardData.recipients.length === 0) {
+                UI.showError('Upload CSV or add recipients manually');
+                return;
+            }
+        }
+        if (s < this.wizardData.totalSteps) { this.wizardData.currentStep++; this.updateWizardStep(); }
+    },
+
+    wizardBack() { if (this.wizardData.currentStep > 1) { this.wizardData.currentStep--; this.updateWizardStep(); } },
+
+    updateWizardStep() {
+        const s = this.wizardData.currentStep;
+        document.querySelectorAll('.wizard-step').forEach(el => { const n = parseInt(el.dataset.step); el.classList.remove('active', 'completed'); if (n === s) el.classList.add('active'); else if (n < s) el.classList.add('completed'); });
+        document.querySelectorAll('.wizard-panel').forEach(p => { p.classList.toggle('active', parseInt(p.dataset.step) === s); });
+        document.getElementById('wizardBackBtn').style.display = s > 1 ? '' : 'none';
+        document.getElementById('wizardNextBtn').style.display = s < 6 ? '' : 'none';
+        document.getElementById('wizardLaunchBtn').style.display = s === 6 ? '' : 'none';
+        if (s === 6) { document.getElementById('reviewCampaignName').textContent = this.wizardData.campaignName; document.getElementById('reviewSubject').textContent = this.wizardData.subject; document.getElementById('reviewRecipients').textContent = this.wizardData.recipients.length + ' recipients'; }
+    },
+
+    updateWizardPreview() {
+        const content = document.getElementById('wizardTemplate')?.value || '';
+        const iframe = document.getElementById('wizardTemplatePreview');
+        if (!iframe) return;
+
+        // Replace placeholders with previewData values
+        let rendered = content;
+        const placeholders = content.match(/\{\{(\w+)\}\}/g) || [];
+        placeholders.forEach(p => {
+            const key = p.replace(/\{\{|\}\}/g, '');
+            const value = this.previewData[key] || `{{${key}}}`;
+            rendered = rendered.replace(new RegExp(p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), value);
+        });
+
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        doc.open(); doc.write(rendered); doc.close();
+    },
+
+    async handleWizardCsvUpload(e) {
+        const file = e.target.files?.[0]; if (!file) return;
+        const preview = document.getElementById('wizardCsvPreview');
+        try {
+            const csv = await Campaign.parseCSV(file);
+            this.wizardData.csvData = csv;
+            const emailCol = csv.headers.find(h => h.toLowerCase().includes('email')) || csv.headers[0];
+            const nameCol = csv.headers.find(h => h.toLowerCase().includes('name')) || csv.headers[1] || csv.headers[0];
+            this.wizardData.recipients = Campaign.extractRecipients(csv.rows, emailCol, nameCol);
+            if (preview) preview.innerHTML = `< p class="success" >✓ ${csv.rows.length} recipients loaded</p > `;
+        } catch (err) { if (preview) preview.innerHTML = `< p class="error" > ${err.message}</p > `; }
+    },
+
+    saveWizardDraft() {
+        const name = document.getElementById('wizardCampaignName')?.value.trim() || 'Untitled';
+        const campaign = { id: 'draft_' + Date.now(), name, subject: document.getElementById('wizardSubject')?.value.trim() || '', template: document.getElementById('wizardTemplate')?.value || '', recipientCount: this.wizardData.recipients.length, createdAt: new Date().toISOString(), status: 'draft', recipients: this.wizardData.recipients, batchSize: 10, delaySeconds: 2 };
+        this.campaigns.unshift(campaign); this.saveToStorage(); this.renderCampaignGrid(); this.closeWizard(); UI.showSuccess('Draft saved!');
+    },
+
+    async launchFromWizard() {
+        if (!this.wizardData.campaignName || !this.wizardData.subject || !this.wizardData.templateContent || !this.wizardData.recipients.length) { UI.showError('Complete all steps'); return; }
+        this.closeWizard();
+        this.pendingFormData = { name: this.wizardData.campaignName, subject: this.wizardData.subject, template: this.wizardData.templateContent, recipients: this.wizardData.recipients, batch_size: parseInt(document.getElementById('wizardBatchSize')?.value) || 10, delay_seconds: parseFloat(document.getElementById('wizardDelaySeconds')?.value) || 2 };
+        this.showEditorView(); await this.validateEmails(this.wizardData.recipients);
+    },
+
+    showCampaignList() { document.getElementById('campaignListView').style.display = 'block'; document.getElementById('campaignEditorView').style.display = 'none'; },
+    showEditorView() { document.getElementById('campaignListView').style.display = 'none'; document.getElementById('campaignEditorView').style.display = 'block'; },
+
+    editCampaign(id) {
+        const c = this.campaigns.find(x => x.id === id); if (!c) return;
+        this.currentEditingCampaign = c;
+        document.getElementById('editCampaignId').value = id;
+        document.getElementById('editCampaignName').value = c.name || '';
+        document.getElementById('editSubject').value = c.subject || '';
+        document.getElementById('editTemplate').value = c.template || '';
+        document.getElementById('editBatchSize').value = c.batchSize || 10;
+        document.getElementById('editDelaySeconds').value = c.delaySeconds || 2;
+        document.getElementById('editorCampaignTitle').textContent = 'Edit: ' + (c.name || 'Campaign');
+        this.editRecipients = c.recipients || [];
+        const p = document.getElementById('editCsvPreview'); if (p && this.editRecipients.length) p.innerHTML = `< p class="success" >✓ ${this.editRecipients.length} recipients</p > `;
+        this.showEditorView();
+    },
+
+    deleteCampaign(id) { if (confirm('Delete this campaign?')) { this.campaigns = this.campaigns.filter(c => c.id !== id); this.saveToStorage(); this.renderCampaignGrid(); UI.showSuccess('Deleted'); } },
+    viewCampaignReport(id, name) { this.showEditorView(); this.viewReport(id, name); },
+
+    async handleEditorCsvUpload(e) {
+        const file = e.target.files?.[0]; if (!file) return;
+        const preview = document.getElementById('editCsvPreview');
+        try {
+            const csv = await Campaign.parseCSV(file);
+            const emailCol = csv.headers.find(h => h.toLowerCase().includes('email')) || csv.headers[0];
+            const nameCol = csv.headers.find(h => h.toLowerCase().includes('name')) || csv.headers[1] || csv.headers[0];
+            this.editRecipients = Campaign.extractRecipients(csv.rows, emailCol, nameCol);
+            if (preview) preview.innerHTML = `< p class="success" >✓ ${csv.rows.length} recipients</p > `;
+        } catch (err) { if (preview) preview.innerHTML = `< p class="error" > ${err.message}</p > `; }
+    },
+
+    saveEditorDraft() {
+        const id = document.getElementById('editCampaignId')?.value;
+        const c = this.campaigns.find(x => x.id === id); if (!c) return;
+        c.name = document.getElementById('editCampaignName')?.value.trim() || c.name;
+        c.subject = document.getElementById('editSubject')?.value.trim() || c.subject;
+        c.template = document.getElementById('editTemplate')?.value || c.template;
+        c.batchSize = parseInt(document.getElementById('editBatchSize')?.value) || 10;
+        c.delaySeconds = parseFloat(document.getElementById('editDelaySeconds')?.value) || 2;
+        c.recipients = this.editRecipients || c.recipients;
+        c.recipientCount = (c.recipients || []).length;
+        this.saveToStorage(); this.renderCampaignGrid(); UI.showSuccess('Draft saved!');
+    },
+
+    async handleEditorSubmit(e) {
+        e.preventDefault();
+        const name = document.getElementById('editCampaignName')?.value.trim();
+        const subject = document.getElementById('editSubject')?.value.trim();
+        const template = document.getElementById('editTemplate')?.value.trim();
+        if (!name || !subject || !template) { UI.showError('Fill required fields'); return; }
+        if (!this.editRecipients?.length) { UI.showError('Upload CSV'); return; }
+        this.pendingFormData = { name, subject, template, recipients: this.editRecipients, batch_size: parseInt(document.getElementById('editBatchSize')?.value) || 10, delay_seconds: parseFloat(document.getElementById('editDelaySeconds')?.value) || 2 };
+        await this.validateEmails(this.editRecipients);
+    },
+
+
+
     async loadDeliveryReport(campaignId) {
         try {
             const response = await API.getDeliveryReport(campaignId);
@@ -529,7 +1056,7 @@ const Dashboard = {
         const applyPreviewDataBtn = document.getElementById('applyPreviewDataBtn');
         const cancelPreviewDataBtn = document.getElementById('cancelPreviewDataBtn');
         const templateContent = document.getElementById('templateContent');
-        
+
         if (templateForm) templateForm.addEventListener('submit', (e) => this.saveTemplate(e));
         if (resetBtn) resetBtn.addEventListener('click', () => this.resetTemplates());
         if (cancelEditBtn) cancelEditBtn.addEventListener('click', () => this.cancelTemplateEdit());
@@ -539,7 +1066,7 @@ const Dashboard = {
         if (editPreviewDataBtn) editPreviewDataBtn.addEventListener('click', () => this.openPreviewDataModal());
         if (applyPreviewDataBtn) applyPreviewDataBtn.addEventListener('click', () => this.applyPreviewData());
         if (cancelPreviewDataBtn) cancelPreviewDataBtn.addEventListener('click', () => this.closePreviewDataModal());
-        
+
         if (templateContent) {
             templateContent.addEventListener('input', () => this.updateTemplatePreview());
             templateContent.addEventListener('keydown', (e) => {
@@ -552,11 +1079,11 @@ const Dashboard = {
                 }
             });
         }
-        
+
         document.querySelectorAll('.editor-tab').forEach(tab => {
             tab.addEventListener('click', () => this.changeEditorView(tab.dataset.view));
         });
-        
+
         this.previewData = {
             name: 'John Doe',
             email: 'john@example.com',
@@ -647,17 +1174,17 @@ const Dashboard = {
             time_remaining: '5 days',
             feedback_link: 'https://example.com/feedback'
         };
-        
+
         this.editingTemplateIndex = null;
     },
 
     changeEditorView(view) {
         document.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'));
-        document.querySelector(`.editor-tab[data-view="${view}"]`).classList.add('active');
-        
+        document.querySelector(`.editor - tab[data - view="${view}"]`).classList.add('active');
+
         const container = document.getElementById('editorContainer');
         container.classList.remove('code-only', 'preview-only', 'visual-mode');
-        
+
         if (view === 'code') container.classList.add('code-only');
         if (view === 'preview') container.classList.add('preview-only');
         if (view === 'visual') {
@@ -669,51 +1196,51 @@ const Dashboard = {
     renderVisualEditor() {
         const content = document.getElementById('templateContent').value;
         const container = document.getElementById('visualEditorContent');
-        
+
         if (!content.trim()) {
             container.innerHTML = '<p class="empty-state">Load a template first to edit its text content</p>';
             return;
         }
-        
+
         const textElements = this.extractTextElements(content);
-        
+
         if (textElements.length === 0) {
             container.innerHTML = '<p class="empty-state">No editable text found in this template</p>';
             return;
         }
-        
+
         let html = '<div class="visual-section"><div class="visual-section-title"><span class="section-icon">📝</span> Editable Text Content</div>';
-        
+
         textElements.forEach((el, idx) => {
             const fieldType = el.tag.match(/^h[1-6]$/i) ? 'heading' : (el.tag === 'a' ? 'link' : 'paragraph');
-            const typeLabel = el.tag.match(/^h[1-6]$/i) ? `Heading ${el.tag.charAt(1)}` : (el.tag === 'a' ? 'Link Text' : 'Text');
+            const typeLabel = el.tag.match(/^h[1-6]$/i) ? `Heading ${el.tag.charAt(1)} ` : (el.tag === 'a' ? 'Link Text' : 'Text');
             const placeholders = el.text.match(/\{\{(\w+)\}\}/g) || [];
-            const placeholderTags = placeholders.map(p => `<span class="visual-placeholder-tag">${p}</span>`).join('');
-            
+            const placeholderTags = placeholders.map(p => `< span class="visual-placeholder-tag" > ${p}</span > `).join('');
+
             html += `
-                <div class="visual-field" data-index="${idx}">
-                    <div class="visual-field-label">
-                        <span>${typeLabel}</span>
-                        <span class="field-type type-${fieldType}">${el.tag.toUpperCase()}</span>
-                        ${placeholderTags}
-                    </div>
-                    ${el.text.length > 100 ? 
-                        `<textarea class="visual-input" data-index="${idx}">${this.escapeHtml(el.text)}</textarea>` :
-                        `<input type="text" class="visual-input" data-index="${idx}" value="${this.escapeHtml(el.text)}">`
-                    }
-                </div>
-            `;
+    < div class="visual-field" data - index="${idx}" >
+        <div class="visual-field-label">
+            <span>${typeLabel}</span>
+            <span class="field-type type-${fieldType}">${el.tag.toUpperCase()}</span>
+            ${placeholderTags}
+        </div>
+                    ${el.text.length > 100 ?
+                    `<textarea class="visual-input" data-index="${idx}">${this.escapeHtml(el.text)}</textarea>` :
+                    `<input type="text" class="visual-input" data-index="${idx}" value="${this.escapeHtml(el.text)}">`
+                }
+                </div >
+    `;
         });
-        
+
         html += '</div>';
-        html += `<div class="visual-apply-btn">
-            <button type="button" class="btn btn-primary" id="applyVisualChanges">Apply Changes to Template</button>
-        </div>`;
-        
+        html += `< div class="visual-apply-btn" >
+    <button type="button" class="btn btn-primary" id="applyVisualChanges">Apply Changes to Template</button>
+        </div >`;
+
         container.innerHTML = html;
-        
+
         document.getElementById('applyVisualChanges')?.addEventListener('click', () => this.applyVisualChanges());
-        
+
         container.querySelectorAll('.visual-input').forEach(input => {
             input.addEventListener('input', () => {
                 input.closest('.visual-field').classList.add('modified');
@@ -725,7 +1252,7 @@ const Dashboard = {
         const elements = [];
         const tagRegex = /<(h[1-6]|p|span|a|td|li|strong|em|b|i)[^>]*>([^<]+)<\/\1>/gi;
         let match;
-        
+
         while ((match = tagRegex.exec(html)) !== null) {
             const text = match[2].trim();
             if (text && text.length > 1 && !/^[\s\d\.\,\;\:\!\?\-\_\=\+\*\&\%\$\#\@]+$/.test(text)) {
@@ -737,7 +1264,7 @@ const Dashboard = {
                 });
             }
         }
-        
+
         return elements;
     },
 
@@ -745,43 +1272,43 @@ const Dashboard = {
         let content = document.getElementById('templateContent').value;
         const originalElements = this.extractTextElements(content);
         const inputs = document.querySelectorAll('.visual-input');
-        
+
         const changes = [];
         inputs.forEach(input => {
             const idx = parseInt(input.dataset.index);
             const newText = input.value;
             const original = originalElements[idx];
-            
+
             if (original && original.text !== newText) {
                 changes.push({ original, newText });
             }
         });
-        
+
         changes.reverse().forEach(change => {
             const oldTag = change.original.fullMatch;
             const newTag = oldTag.replace(change.original.text, change.newText);
             content = content.replace(oldTag, newTag);
         });
-        
+
         document.getElementById('templateContent').value = content;
         this.updateTemplatePreview();
-        
-        UI.showSuccess(`Applied ${changes.length} text change${changes.length !== 1 ? 's' : ''}`);
-        
+
+        UI.showSuccess(`Applied ${changes.length} text change${changes.length !== 1 ? 's' : ''} `);
+
         this.renderVisualEditor();
     },
 
     changePreviewDevice(device) {
         const wrapper = document.getElementById('previewWrapper');
         wrapper.classList.remove('device-desktop', 'device-tablet', 'device-mobile');
-        if (device !== 'desktop') wrapper.classList.add(`device-${device}`);
+        if (device !== 'desktop') wrapper.classList.add(`device - ${device} `);
     },
 
     updateTemplatePreview() {
         const content = document.getElementById('templateContent').value;
         const iframe = document.getElementById('templatePreview');
         if (!iframe) return;
-        
+
         let rendered = content;
         const placeholders = content.match(/\{\{(\w+)\}\}/g) || [];
         placeholders.forEach(p => {
@@ -789,7 +1316,7 @@ const Dashboard = {
             const value = this.previewData[key] || `[${key}]`;
             rendered = rendered.replace(new RegExp(p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), value);
         });
-        
+
         const doc = iframe.contentDocument || iframe.contentWindow.document;
         doc.open();
         doc.write(rendered);
@@ -799,19 +1326,19 @@ const Dashboard = {
     openPreviewDataModal() {
         const content = document.getElementById('templateContent').value;
         const placeholders = [...new Set((content.match(/\{\{(\w+)\}\}/g) || []).map(p => p.replace(/\{\{|\}\}/g, '')))];
-        
+
         const container = document.getElementById('previewVariablesContainer');
         if (placeholders.length === 0) {
             container.innerHTML = '<p style="color:#999;grid-column:1/-1;">No placeholders found in template. Use {{variable_name}} syntax.</p>';
         } else {
             container.innerHTML = placeholders.map(p => `
-                <div class="form-group">
+    < div class="form-group" >
                     <label>{{${p}}}</label>
                     <input type="text" id="previewVar_${p}" value="${this.previewData[p] || ''}" placeholder="Sample value">
                 </div>
-            `).join('');
+`).join('');
         }
-        
+
         document.getElementById('previewDataModal').style.display = 'flex';
     },
 
@@ -856,20 +1383,20 @@ const Dashboard = {
             UI.showError('Template name and content are required');
             return;
         }
-        
+
         const defaultCount = typeof EmailTemplates !== 'undefined' ? EmailTemplates.length : 0;
-        
+
         if (this.editingTemplateIndex !== null) {
             const template = this.templates[this.editingTemplateIndex];
             if (this.editingTemplateIndex >= defaultCount && template.id) {
                 try {
                     await API.updateCustomTemplate(template.id, { name, content });
-                } catch (e) {}
+                } catch (e) { }
             }
-            this.templates[this.editingTemplateIndex] = { 
+            this.templates[this.editingTemplateIndex] = {
                 ...template,
-                name, 
-                content, 
+                name,
+                content,
                 updatedAt: new Date().toISOString()
             };
             this.editingTemplateIndex = null;
@@ -887,7 +1414,7 @@ const Dashboard = {
             }
             UI.showSuccess('Template saved!');
         }
-        
+
         this.renderTemplateList();
         this.populateTemplateSelect();
         document.getElementById('templateName').value = '';
@@ -899,14 +1426,14 @@ const Dashboard = {
     editTemplate(idx) {
         const template = this.templates[idx];
         if (!template) return;
-        
+
         this.editingTemplateIndex = idx;
         document.getElementById('templateName').value = template.name;
         document.getElementById('templateContent').value = template.content;
         document.getElementById('editorTitle').textContent = 'Edit Template';
         document.getElementById('cancelEditBtn').style.display = 'inline-block';
         document.getElementById('saveTemplateBtn').textContent = 'Update Template';
-        
+
         this.updateTemplatePreview();
         UI.showTab('templates');
         document.getElementById('templateName').focus();
@@ -925,7 +1452,7 @@ const Dashboard = {
     previewTemplate(idx) {
         const template = this.templates[idx];
         if (!template) return;
-        
+
         document.getElementById('templateContent').value = template.content;
         this.updateTemplatePreview();
         this.changeEditorView('preview');
@@ -939,33 +1466,33 @@ const Dashboard = {
             console.error('templateList container not found');
             return;
         }
-        
+
         // Ensure we have valid templates array
         if (!Array.isArray(this.templates)) {
             console.error('this.templates is not an array:', typeof this.templates);
             this.templates = [];
         }
-        
+
         if (countBadge) countBadge.textContent = this.templates.length;
-        
+
         if (this.templates.length === 0) {
             container.innerHTML = '<p class="empty-state">No templates saved yet.</p>';
             console.warn('renderTemplateList: No templates to render. this.templates.length =', this.templates.length);
             return;
         }
-        
+
         // Filter out invalid templates
         const validTemplates = this.templates.filter(t => t && t.name && t.content);
         if (validTemplates.length !== this.templates.length) {
             console.warn(`Filtered out ${this.templates.length - validTemplates.length} invalid templates`);
         }
-        
+
         container.innerHTML = validTemplates.map((t, i) => {
             const originalIndex = this.templates.indexOf(t);
             const previewHtml = (t.content || '').substring(0, 2000);
             const createdAt = t.createdAt ? new Date(t.createdAt).toLocaleDateString() : 'Unknown date';
             return `
-            <div class="template-card">
+    < div class="template-card" >
                 <div class="template-card-preview">
                     <iframe srcdoc="${this.escapeHtml(previewHtml)}" sandbox></iframe>
                 </div>
@@ -979,9 +1506,9 @@ const Dashboard = {
                         <button class="btn btn-danger btn-small" onclick="Dashboard.deleteTemplate(${originalIndex})">×</button>
                     </div>
                 </div>
-            </div>
-        `}).join('');
-        
+            </div >
+    `}).join('');
+
         console.log(`Rendered ${validTemplates.length} templates`);
     },
 
@@ -1006,7 +1533,7 @@ const Dashboard = {
         if (idx >= defaultCount && template && template.id) {
             try {
                 await API.deleteCustomTemplate(template.id);
-            } catch (e) {}
+            } catch (e) { }
         }
         this.templates.splice(idx, 1);
         this.renderTemplateList();
@@ -1067,7 +1594,7 @@ const Dashboard = {
         try {
             const response = await API.getLogs();
             this.logs = (response.logs || []).reverse();
-        } catch (e) {}
+        } catch (e) { }
 
         const typeFilter = document.getElementById('logTypeFilter')?.value || 'all';
         const dateFilter = document.getElementById('logDateFilter')?.value || '';
@@ -1090,15 +1617,15 @@ const Dashboard = {
             const time = date.toLocaleTimeString();
             const dateStr = date.toLocaleDateString();
             return `
-                <div class="log-item log-${log.type}">
+    < div class="log-item log-${log.type}" >
                     <div class="log-time">${dateStr}<br>${time}</div>
                     <div class="log-content">
                         <span class="log-type type-${log.type}">${log.type}</span>
                         <span class="log-message">${log.message}</span>
                         ${log.details ? `<div class="log-details">${log.details}</div>` : ''}
                     </div>
-                </div>
-            `;
+                </div >
+    `;
         }).join('');
     },
 
@@ -1106,7 +1633,7 @@ const Dashboard = {
         if (confirm('Are you sure you want to clear all logs?')) {
             try {
                 await API.clearLogs();
-            } catch (e) {}
+            } catch (e) { }
             this.logs = [];
             this.renderLogs();
             UI.showSuccess('Logs cleared');
@@ -1116,10 +1643,10 @@ const Dashboard = {
     initSettings() {
         const saveSettingsBtn = document.getElementById('saveSettingsBtn');
         const saveCampaignSettingsBtn = document.getElementById('saveCampaignSettingsBtn');
-        
+
         if (saveSettingsBtn) saveSettingsBtn.addEventListener('click', () => this.saveValidationSettings());
         if (saveCampaignSettingsBtn) saveCampaignSettingsBtn.addEventListener('click', () => this.saveCampaignSettings());
-        
+
         this.loadSettingsToForm();
     },
 

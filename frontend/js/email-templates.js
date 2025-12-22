@@ -1,6 +1,6 @@
 var EmailTemplates = [
     {
-        name: '👋 Welcome - Stunning Gradient',
+        name: 'Welcome - Stunning Gradient',
         content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -69,7 +69,7 @@ var EmailTemplates = [
         createdAt: new Date().toISOString()
     },
     {
-        name: '✨ Stripe Style - Receipt',
+        name: 'Stripe Style - Receipt',
         content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -85,7 +85,7 @@ var EmailTemplates = [
 </td></tr>
 <tr><td style="padding:0 48px;">
 <p style="color:#8898aa;font-size:14px;margin:0 0 8px;">Amount paid</p>
-<p style="color:#1a1f36;font-size:36px;font-weight:600;margin:0 0 24px;">${{ amount }}</p>
+<p style="color:#1a1f36;font-size:36px;font-weight:600;margin:0 0 24px;">\${{amount}}</p>
 <p style="color:#8898aa;font-size:14px;margin:0 0 4px;">Date paid</p>
 <p style="color:#1a1f36;font-size:15px;margin:0 0 24px;">{{payment_date}}</p>
 <p style="color:#8898aa;font-size:14px;margin:0 0 4px;">Payment method</p>
@@ -93,9 +93,9 @@ var EmailTemplates = [
 </td></tr>
 <tr><td style="padding:32px 48px;">
 <table width="100%" style="border-top:1px solid #e6ebf1;border-bottom:1px solid #e6ebf1;">
-<tr><td style="padding:16px 0;color:#1a1f36;font-size:14px;">{{item_name}}</td><td align="right" style="padding:16px 0;color:#1a1f36;font-size:14px;">${{ item_price }}</td></tr>
+<tr><td style="padding:16px 0;color:#1a1f36;font-size:14px;">{{item_name}}</td><td align="right" style="padding:16px 0;color:#1a1f36;font-size:14px;">\${{item_price}}</td></tr>
 </table>
-<table width="100%"><tr><td style="padding:16px 0;color:#1a1f36;font-size:14px;font-weight:600;">Total</td><td align="right" style="padding:16px 0;color:#1a1f36;font-size:14px;font-weight:600;">${{ amount }}</td></tr></table>
+<table width="100%"><tr><td style="padding:16px 0;color:#1a1f36;font-size:14px;font-weight:600;">Total</td><td align="right" style="padding:16px 0;color:#1a1f36;font-size:14px;font-weight:600;">\${{amount}}</td></tr></table>
 </td></tr>
 <tr><td style="padding:0 48px 40px;">
 <p style="color:#8898aa;font-size:13px;line-height:1.6;margin:0;">If you have any questions, contact us at <a href="mailto:{{support_email}}" style="color:#635bff;text-decoration:none;">{{support_email}}</a></p>
@@ -107,7 +107,7 @@ var EmailTemplates = [
         createdAt: new Date().toISOString()
     },
     {
-        name: '🔮 Linear Style - Update',
+        name: 'Linear Style - Update',
         content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -149,7 +149,7 @@ var EmailTemplates = [
 
 
 EmailTemplates.push({
-    name: '🍎 Apple Style - Minimal',
+    name: 'Apple Style - Minimal',
     content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -183,7 +183,7 @@ EmailTemplates.push({
 });
 
 EmailTemplates.push({
-    name: '📝 Notion Style - Invite',
+    name: 'Notion Style - Invite',
     content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -223,7 +223,7 @@ EmailTemplates.push({
 });
 
 EmailTemplates.push({
-    name: '▲ Vercel Style - Deploy',
+    name: 'Vercel Style - Deploy',
     content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -269,7 +269,7 @@ EmailTemplates.push({
 
 
 EmailTemplates.push({
-    name: '🎨 Figma Style - Comment',
+    name: 'Figma Style - Comment',
     content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -308,7 +308,7 @@ EmailTemplates.push({
 });
 
 EmailTemplates.push({
-    name: '🚀 Superhuman Style - Digest',
+    name: 'Superhuman Style - Digest',
     content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -358,7 +358,7 @@ EmailTemplates.push({
 });
 
 EmailTemplates.push({
-    name: '💳 Revolut Style - Transaction',
+    name: 'Revolut Style - Transaction',
     content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -408,7 +408,7 @@ EmailTemplates.push({
 
 
 EmailTemplates.push({
-    name: '🎯 Slack Style - Notification',
+    name: 'Slack Style - Notification',
     content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -456,7 +456,7 @@ EmailTemplates.push({
 });
 
 EmailTemplates.push({
-    name: '🌈 Gradient Hero - Marketing',
+    name: 'Gradient Hero - Marketing',
     content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -503,7 +503,7 @@ EmailTemplates.push({
 });
 
 EmailTemplates.push({
-    name: '🏷️ Minimal Sale - E-commerce',
+    name: 'Minimal Sale - E-commerce',
     content: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>

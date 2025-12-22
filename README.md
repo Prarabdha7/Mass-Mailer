@@ -15,6 +15,12 @@
 
 </div>
 
+## Showcase
+
+<p align="center">
+<img src="./1.gif" alt="Dashboard Overview" width="80%">
+</p>
+
 ## The Problem
 
 Sending personalized emails at scale is **painful**:
@@ -115,6 +121,8 @@ cp .env.example .env
 # 4. Launch
 cd backend && python app.py
 ```
+
+> **Testing:** Demo credentials are available in `creds.txt`
 
 <div align="center">
 
@@ -225,14 +233,6 @@ mass-mailer/
 | `/api/campaign-status/:id` | `GET` | Track progress |
 | `/api/delivery-report/:id` | `GET` | Get detailed report |
 
-## Roadmap
-
-- [ ] Scheduled campaigns
-- [ ] A/B testing for templates
-- [ ] Open/click tracking analytics
-- [ ] Webhook integrations
-- [ ] Multi-user with role-based access
-
 ## Testing
 
 ```bash
@@ -247,8 +247,6 @@ cd frontend && npm test
 
 <div align="center">
 
-### Built at the Hackathon
-
-**Star this repo if you found it useful!**
+### This was fun to build <3
 
 </div>

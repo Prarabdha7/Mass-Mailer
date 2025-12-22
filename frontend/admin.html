@@ -1,49 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
+            background: #14120B;
             min-height: 100vh;
+            color: #e8e6e0;
         }
+        
         .header {
-            background: #667eea;
-            color: white;
+            background: #1a1812;
+            color: #d4a574;
             padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid #2a2520;
         }
-        .header h1 { font-size: 1.5rem; }
-        .user-info { display: flex; align-items: center; gap: 1rem; }
-        .user-email { font-size: 0.9rem; opacity: 0.9; }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            color: #d4a574;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-email {
+            font-size: 0.9rem;
+            color: #999;
+        }
+        
         .btn-logout {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: none;
+            background: rgba(212, 165, 116, 0.2);
+            color: #d4a574;
+            border: 1px solid rgba(212, 165, 116, 0.3);
             padding: 0.5rem 1rem;
             border-radius: 4px;
             cursor: pointer;
+            transition: all 0.2s;
         }
-        .btn-logout:hover { background: rgba(255,255,255,0.3); }
+        
+        .btn-logout:hover {
+            background: rgba(212, 165, 116, 0.3);
+            border-color: #d4a574;
+        }
+        
         .content {
             padding: 2rem;
             max-width: 1200px;
             margin: 0 auto;
         }
+        
         .welcome {
-            background: white;
+            background: #1a1812;
             padding: 2rem;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            border: 1px solid #2a2520;
+        }
+        
+        .welcome h2 {
+            color: #d4a574;
+        }
+        
+        .welcome p {
+            color: #999;
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h1>Admin Dashboard</h1>
@@ -73,4 +113,5 @@
         });
     </script>
 </body>
+
 </html>

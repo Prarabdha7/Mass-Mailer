@@ -6,31 +6,29 @@
 
 body {
     font-family: "Times New Roman", Tahoma, sans-serif;
-    background: linear-gradient(135deg, #94b7ed, #578de4), #ced9eb;
+    background: linear-gradient(135deg, #1a1812, #14120B), #14120B;
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-
 .container {
-    background: #ffffff;
+    background: #1a1812;
     width: 100%;
     max-width: 520px;
     padding: 30px 35px;
     border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 1px solid #2a2520;
 }
-
 
 h2 {
     text-align: center;
-    color: #2c3e50;
+    color: #d4a574;
     margin-bottom: 25px;
     font-size: 24px;
 }
-
 
 form {
     display: flex;
@@ -39,7 +37,6 @@ form {
     margin-bottom: 10px;
 }
 
-
 input[type="text"],
 input[type="file"],
 textarea {
@@ -47,7 +44,9 @@ textarea {
     padding: 10px 12px;
     font-size: 14px;
     border-radius: 6px;
-    border: 1px solid #dcdfe3;
+    border: 1px solid #3a3428;
+    background: #25221a;
+    color: #e8e6e0;
     outline: none;
     transition: border 0.3s, box-shadow 0.3s;
 }
@@ -57,13 +56,11 @@ textarea {
     resize: vertical;
 }
 
-
 input:focus,
 textarea:focus {
-    border-color: #4a90e2;
-    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+    border-color: #d4a574;
+    box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.2);
 }
-
 
 button {
     padding: 12px;
@@ -74,29 +71,34 @@ button {
     transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
 }
 
-
 button[type="submit"] {
-    background: #4a90e2;
-    color: #ffffff;
+    background: #d4a574;
+    color: #14120B;
+    font-weight: 600;
 }
-
 
 button:not([type="submit"]) {
-    background: #2ecc71;
-    color: #ffffff;
+    background: #7cb97c;
+    color: #14120B;
+    font-weight: 600;
 }
-
 
 button:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
 }
 
+button[type="submit"]:hover {
+    background: #c49464;
+}
 
-button + button {
+button:not([type="submit"]):hover {
+    background: #6ba86b;
+}
+
+button+button {
     margin-top: 10px;
 }
-
 
 @media (max-width: 600px) {
     .container {

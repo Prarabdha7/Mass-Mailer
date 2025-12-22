@@ -484,7 +484,7 @@ const Dashboard = {
                     ${c.sent !== undefined ? `<span class="stat">Sent: ${c.sent}</span>` : ''}
                     ${c.failed !== undefined ? `<span class="stat">Failed: ${c.failed}</span>` : ''}
                 </div>
-                <button class="btn btn-small" onclick="Dashboard.viewReport('${c.id}', '${(c.name || 'Campaign').replace(/'/g, "\\'")}')">View Report</button>
+                <button class="btn btn-small" onclick="Dashboard.viewCampaignReport('${c.id}', '${(c.name || 'Campaign').replace(/'/g, "\\'")}')">View Report</button>
             </div>
         `).join('');
     },
@@ -1141,13 +1141,23 @@ const Dashboard = {
             return;
         }
 
-        // Merge template variables with each recipient's variables
+        const placeholderMatches = this.wizardData.templateContent.match(/\{\{(\w+)\}\}/g) || [];
+        const allPlaceholders = [...new Set(placeholderMatches.map(p => p.replace(/\{\{|\}\}/g, '')))];
+
+        const mergedTemplateVars = {};
+        allPlaceholders.forEach(p => {
+            if (this.wizardData.templateVariables[p] !== undefined && this.wizardData.templateVariables[p] !== '') {
+                mergedTemplateVars[p] = this.wizardData.templateVariables[p];
+            } else if (this.previewData[p] !== undefined) {
+                mergedTemplateVars[p] = this.previewData[p];
+            }
+        });
+
         const recipientsWithVars = this.wizardData.recipients.map(r => ({
             ...r,
-            variables: { ...this.wizardData.templateVariables, ...r.variables }
+            variables: { ...mergedTemplateVars, ...r.variables }
         }));
 
-        // Set pending form data for sendCampaign
         this.pendingFormData = {
             name: this.wizardData.campaignName,
             subject: this.wizardData.subject,
@@ -1183,7 +1193,6 @@ const Dashboard = {
     async sendCampaignFromWizard(recipients) {
         const { name, subject, template, batch_size, delay_seconds } = this.pendingFormData;
 
-        // Filter to only valid recipients
         const validRecipients = recipients.filter(r => r.validationStatus !== 'invalid');
 
         try {
@@ -1195,6 +1204,8 @@ const Dashboard = {
                 name: name,
                 subject: subject,
                 recipientCount: validRecipients.length,
+                batchSize: batch_size,
+                delaySeconds: delay_seconds,
                 createdAt: new Date().toISOString(),
                 status: 'running'
             };
@@ -1267,8 +1278,39 @@ const Dashboard = {
         }
     },
 
-    showCampaignList() { document.getElementById('campaignListView').style.display = 'block'; document.getElementById('campaignEditorView').style.display = 'none'; },
-    showEditorView() { document.getElementById('campaignListView').style.display = 'none'; document.getElementById('campaignEditorView').style.display = 'block'; },
+    showCampaignList() {
+        document.getElementById('campaignListView').style.display = 'block';
+        document.getElementById('campaignEditorView').style.display = 'none';
+
+        // Restore hidden elements for next time editor is shown
+        const editorForm = document.getElementById('campaignEditorForm');
+        if (editorForm) {
+            editorForm.style.display = '';
+            const formPanel = editorForm.closest('.panel');
+            if (formPanel) formPanel.style.display = '';
+        }
+        const pageHeader = document.querySelector('#campaignEditorView .page-header');
+        if (pageHeader) pageHeader.style.display = '';
+        const reportPanel = document.getElementById('reportPanel');
+        if (reportPanel) reportPanel.style.display = 'none';
+    },
+
+    showEditorView() {
+        document.getElementById('campaignListView').style.display = 'none';
+        document.getElementById('campaignEditorView').style.display = 'block';
+
+        // Ensure form and header are visible when editing
+        const editorForm = document.getElementById('campaignEditorForm');
+        if (editorForm) {
+            editorForm.style.display = '';
+            const formPanel = editorForm.closest('.panel');
+            if (formPanel) formPanel.style.display = '';
+        }
+        const pageHeader = document.querySelector('#campaignEditorView .page-header');
+        if (pageHeader) pageHeader.style.display = '';
+        const reportPanel = document.getElementById('reportPanel');
+        if (reportPanel) reportPanel.style.display = 'none';
+    },
 
     editCampaign(id) {
         const c = this.campaigns.find(x => x.id === id); if (!c) return;
@@ -1286,7 +1328,55 @@ const Dashboard = {
     },
 
     deleteCampaign(id) { if (confirm('Delete this campaign?')) { this.campaigns = this.campaigns.filter(c => c.id !== id); this.saveToStorage(); this.renderCampaignGrid(); UI.showSuccess('Deleted'); } },
-    viewCampaignReport(id, name) { this.showEditorView(); this.viewReport(id, name); },
+    viewCampaignReport(id, name) {
+        // Hide list view
+        document.getElementById('campaignListView').style.display = 'none';
+
+        // Show editor view container
+        document.getElementById('campaignEditorView').style.display = 'block';
+
+        // Hide the editor form and its parent panel
+        const editorForm = document.getElementById('campaignEditorForm');
+        if (editorForm) {
+            editorForm.style.display = 'none';
+            // Also hide the parent panel
+            const formPanel = editorForm.closest('.panel');
+            if (formPanel) formPanel.style.display = 'none';
+        }
+
+        // Hide page header with Back button and title
+        const pageHeader = document.querySelector('#campaignEditorView .page-header');
+        if (pageHeader) pageHeader.style.display = 'none';
+
+        // Hide validation and progress panels
+        const validationPanel = document.getElementById('validationPanel');
+        if (validationPanel) validationPanel.style.display = 'none';
+        const progressPanel = document.getElementById('progressPanel');
+        if (progressPanel) progressPanel.style.display = 'none';
+
+        // Ensure report panel is visible
+        document.getElementById('reportPanel').style.display = 'block';
+
+        // Populate Campaign Details
+        const c = this.campaigns.find(x => x.id === id);
+        if (c) {
+            document.getElementById('reportSubject').textContent = c.subject || '-';
+            // Try to find template name if possible, or just show ID/Type
+            // If template is set by ID/Name in recent changes, show that. 
+            // Since c.template stores the content string usually, we might check if it matches a known template.
+            // For now, let's just say "Custom Template" or similar if we can't match it.
+            // Actually, for now let's just truncate the content or show "HTML Template"
+            document.getElementById('reportTemplateName').textContent = 'HTML Template';
+            document.getElementById('reportBatchSize').textContent = c.batchSize || 10;
+            document.getElementById('reportDelay').textContent = c.delaySeconds || 2;
+            document.getElementById('reportDate').textContent = c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '-';
+            document.getElementById('reportStatus').textContent = (c.status || 'draft').toUpperCase();
+        }
+
+        this.currentCampaignId = id;
+        document.getElementById('reportCampaignName').textContent = name || (c ? c.name : 'Campaign');
+        this.loadDeliveryReport(id);
+    },
 
     async handleEditorCsvUpload(e) {
         const file = e.target.files?.[0]; if (!file) return;
@@ -1327,15 +1417,37 @@ const Dashboard = {
 
 
     async loadDeliveryReport(campaignId) {
+        const reportTableBody = document.getElementById('reportTableBody');
+        const totalRecords = document.getElementById('totalRecords');
+        const sentRecords = document.getElementById('sentRecords');
+        const failedRecords = document.getElementById('failedRecords');
+
+        // Check if this is a draft (not sent to backend)
+        const campaign = this.campaigns.find(c => c.id === campaignId);
+        if (campaign && (campaign.status === 'draft' || campaignId.startsWith('draft_'))) {
+            if (reportTableBody) reportTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:#888;">This is a draft campaign. Send it first to see delivery reports.</td></tr>';
+            if (totalRecords) totalRecords.textContent = '0';
+            if (sentRecords) sentRecords.textContent = '0';
+            if (failedRecords) failedRecords.textContent = '0';
+            return;
+        }
+
         try {
             const response = await API.getDeliveryReport(campaignId);
-            const records = response.records || response;
+            const records = response.records || response || [];
             this.allDeliveryRecords = records;
             document.getElementById('reportPanel').style.display = 'block';
             UI.renderDeliveryReport(records);
             UI.showTab('campaigns');
         } catch (err) {
-            UI.showError('Failed to load delivery report: ' + err.message);
+            console.error('Delivery report error:', err);
+            // Show a user-friendly message in the table
+            if (reportTableBody) {
+                reportTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:#c97c7c;">Report not available. The campaign data may have been cleared when the server restarted.</td></tr>';
+            }
+            if (totalRecords) totalRecords.textContent = campaign?.recipientCount || '0';
+            if (sentRecords) sentRecords.textContent = campaign?.sent || '?';
+            if (failedRecords) failedRecords.textContent = campaign?.failed || '?';
         }
     },
 
@@ -1800,22 +1912,22 @@ const Dashboard = {
             const previewHtml = (t.content || '').substring(0, 2000);
             const createdAt = t.createdAt ? new Date(t.createdAt).toLocaleDateString() : 'Unknown date';
             return `
-    < div class="template-card" >
-                <div class="template-card-preview">
-                    <iframe srcdoc="${this.escapeHtml(previewHtml)}" sandbox></iframe>
-                </div>
-                <div class="template-card-body">
-                    <div class="template-card-name">${this.escapeHtml(t.name || 'Unnamed Template')}</div>
-                    <div class="template-card-date">${createdAt}</div>
-                    <div class="template-card-actions">
-                        <button class="btn btn-secondary btn-small" onclick="Dashboard.previewTemplate(${originalIndex})">Preview</button>
-                        <button class="btn btn-primary btn-small" onclick="Dashboard.editTemplate(${originalIndex})">Edit</button>
-                        <button class="btn btn-small" onclick="Dashboard.useTemplate(${originalIndex})">Use</button>
-                        <button class="btn btn-danger btn-small" onclick="Dashboard.deleteTemplate(${originalIndex})">×</button>
+                <div class="template-card">
+                    <div class="template-card-preview">
+                        <iframe srcdoc="${this.escapeHtml(previewHtml)}" sandbox></iframe>
+                    </div>
+                    <div class="template-card-body">
+                        <div class="template-card-name">${this.escapeHtml(t.name || 'Unnamed Template')}</div>
+                        <div class="template-card-date">${createdAt}</div>
+                        <div class="template-card-actions">
+                            <button class="btn btn-secondary btn-small" onclick="Dashboard.previewTemplate(${originalIndex})">Preview</button>
+                            <button class="btn btn-primary btn-small" onclick="Dashboard.editTemplate(${originalIndex})">Edit</button>
+                            <button class="btn btn-small" onclick="Dashboard.useTemplate(${originalIndex})">Use</button>
+                            <button class="btn btn-danger btn-small" onclick="Dashboard.deleteTemplate(${originalIndex})">×</button>
+                        </div>
                     </div>
                 </div>
-            </div >
-    `}).join('');
+            `}).join('');
 
         console.log(`Rendered ${validTemplates.length} templates`);
     },

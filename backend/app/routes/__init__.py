@@ -1,4 +1,6 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, Response
+import csv
+import io
 from app.services.email_validator import validate_emails_batch
 from app.services.smtp_client import (
     SMTPConfig,
@@ -154,3 +156,35 @@ def delivery_report_endpoint(campaign_id):
         return jsonify({'error': f'Campaign {campaign_id} not found'}), 404
     
     return jsonify({'records': [r.to_dict() for r in records]})
+
+@api.route('/delivery-report/<campaign_id>/csv', methods=['GET'])
+@rate_limit
+@require_auth
+def delivery_report_csv_endpoint(campaign_id):
+    records = get_delivery_report(campaign_id)
+    
+    if records is None:
+        return jsonify({'error': f'Campaign {campaign_id} not found'}), 404
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['email', 'recipient_name', 'validation_status', 'send_status', 'failure_reason', 'timestamp'])
+    
+    for record in records:
+        writer.writerow([
+            record.email,
+            record.recipient_name,
+            record.validation_status,
+            record.send_status,
+            record.failure_reason or '',
+            record.timestamp
+        ])
+    
+    csv_content = output.getvalue()
+    output.close()
+    
+    return Response(
+        csv_content,
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename=delivery-report-{campaign_id}.csv'}
+    )

@@ -1,0 +1,7 @@
+SMTP_HOST=smtppro.zoho.in
+SMTP_PORT=587
+SMTP_USERNAME=noreply-massmailer@zuraai.xyz
+SMTP_PASSWORD=iNinjaOP1403!
+SMTP_FROM_EMAIL=noreply-massmailer@zuraai.xyz
+SMTP_FROM_NAME=Mass Mailer
+SMTP_USE_TLS=true

@@ -4,11 +4,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function showError(message) {
         errorDiv.textContent = message;
-        errorDiv.style.display = 'block';
+        errorDiv.classList.add('show');
     }
 
     function hideError() {
-        errorDiv.style.display = 'none';
+        errorDiv.classList.remove('show');
     }
 
     if (Auth.isAuthenticated()) {

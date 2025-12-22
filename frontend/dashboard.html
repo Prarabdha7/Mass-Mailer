@@ -184,7 +184,42 @@
 
                     <!-- Report Panel -->
                     <div id="reportPanel" class="panel" style="display: none;">
-                        <h2>Delivery Report: <span id="reportCampaignName"></span></h2>
+                        <div class="report-header">
+                            <h2>Delivery Report: <span id="reportCampaignName"></span></h2>
+                            <button class="btn btn-secondary btn-small" onclick="Dashboard.showCampaignList()">← Back to
+                                Campaigns</button>
+                        </div>
+
+                        <div class="report-campaign-details">
+                            <h3>Campaign Configuration</h3>
+                            <div class="details-grid">
+                                <div class="detail-item">
+                                    <span class="label">Subject:</span>
+                                    <span class="value" id="reportSubject">-</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Template:</span>
+                                    <span class="value" id="reportTemplateName">-</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Batch Size:</span>
+                                    <span class="value" id="reportBatchSize">-</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Delay:</span>
+                                    <span class="value" id="reportDelay">-</span> seconds
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Created:</span>
+                                    <span class="value" id="reportDate">-</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Status:</span>
+                                    <span class="value" id="reportStatus">-</span>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="report-filters">
                             <label>Filter:</label>
                             <select id="statusFilter">

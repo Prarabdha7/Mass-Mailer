@@ -23,19 +23,15 @@ def render_template(template: str, variables: dict) -> tuple[Optional[str], Opti
     """
     def replace_placeholder(match):
         var_name = match.group(1)
-        value = variables.get(var_name, '')  # Default to empty string for missing vars
-        value = str(value)
-        # If value is "none" (case insensitive), replace with empty string
+        value = variables.get(var_name, '')
+        value = str(value).strip()
         if value.lower() == 'none':
             return ''
         return value
     
     result = PLACEHOLDER_REGEX.sub(replace_placeholder, template)
     
-    # Remove anchor tags with empty href (cleanup for links set to 'none')
-    # This regex removes <a href="">...</a> or <a href=""> (self-referential)
     result = re.sub(r'<a\s+[^>]*href=["\']["\'][^>]*>([^<]*)</a>', r'\1', result, flags=re.IGNORECASE)
-    # Also remove anchor tags where content might have nested tags
     result = re.sub(r'<a\s+[^>]*href=["\']["\'][^>]*>(.*?)</a>', r'\1', result, flags=re.IGNORECASE | re.DOTALL)
     
     return result, None
